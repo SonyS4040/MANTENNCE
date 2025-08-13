@@ -38,6 +38,10 @@ h2 {
   background-color: #f1f1f1;
 }
 
+.ticket-row {
+  cursor: pointer;
+}
+
 .priority, .status {
   padding: 0.25rem 0.75rem;
   border-radius: 12px;

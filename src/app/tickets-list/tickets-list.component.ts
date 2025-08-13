@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { supabase } from '../../integrations/supabase/client';
+import { RouterLink } from '@angular/router';
 
 export interface Ticket {
   id: string;
@@ -15,7 +16,7 @@ export interface Ticket {
 @Component({
   selector: 'app-tickets-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './tickets-list.component.html',
   styleUrl: './tickets-list.component.css'
 })
