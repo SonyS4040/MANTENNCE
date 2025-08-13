@@ -1,0 +1,81 @@
+<div class="ticket-detail-container" *ngIf="!isLoading() && ticket()">
+  @if (ticket(); as ticketData) {
+    <div class="ticket-header">
+      <h2>تفاصيل الطلب: {{ ticketData.ticket_ref }}</h2>
+      <div class="ticket-actions">
+        <button class="btn-delete" (click)="deleteTicket()">حذف الطلب</button>
+      </div>
+    </div>
+
+    <div class="ticket-info-grid">
+      <div class="info-card">
+        <h3>معلومات العميل</h3>
+        <p><strong>الاسم:</strong> {{ ticketData.customer_name }}</p>
+        <p><strong>الهاتف:</strong> {{ ticketData.customer_phone }}</p>
+        <p><strong>البريد الإلكتروني:</strong> {{ ticketData.customer_email }}</p>
+        <p><strong>العنوان:</strong> {{ ticketData.customer_address }}</p>
+      </div>
+
+      <div class="info-card">
+        <h3>معلومات الجهاز والعطل</h3>
+        <p><strong>نوع الجهاز:</strong> {{ ticketData.device_type }}</p>
+        <p><strong>الرقم التسلسلي:</strong> {{ ticketData.serial_number || 'غير متوفر' }}</p>
+        <p><strong>الأولوية:</strong> <span class="priority" [ngClass]="ticketData.priority">{{ ticketData.priority }}</span></p>
+        <p><strong>تاريخ الإنشاء:</strong> {{ ticketData.created_at | date:'yyyy-MM-dd h:mm a' }}</p>
+      </div>
+
+      <div class="info-card full-width">
+        <h3>وصف العطل</h3>
+        <p>{{ ticketData.fault_description }}</p>
+        @if (ticketData.attachment_url) {
+          <div class="attachment">
+            <strong>المرفقات:</strong> 
+            <a [href]="ticketData.attachment_url" target="_blank" rel="noopener noreferrer">عرض المرفق</a>
+          </div>
+        }
+      </div>
+
+      <div class="info-card">
+        <h3>حالة الطلب</h3>
+        <div class="status-section">
+          <p><strong>الحالة الحالية:</strong> <span class="status" [ngClass]="ticketData.status">{{ ticketData.status }}</span></p>
+          <div class="status-buttons">
+            <button (click)="updateStatus('مفتوح')" [disabled]="ticketData.status === 'مفتوح' || isUpdating">مفتوح</button>
+            <button (click)="updateStatus('قيد التنفيذ')" [disabled]="ticketData.status === 'قيد التنفيذ' || isUpdating">قيد التنفيذ</button>
+            <button (click)="updateStatus('مغلق')" [disabled]="ticketData.status === 'مغلق' || isUpdating">مغلق</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>تعيين مهندس</h3>
+        <div class="assign-engineer-section">
+          <p><strong>المهندس المسؤول:</strong> {{ ticketData.assigned_engineer?.name || 'لم يتم التعيين' }}</p>
+          <div class="assign-form">
+            <select [(ngModel)]="selectedEngineerId">
+              <option [ngValue]="null" disabled>اختر مهندسًا...</option>
+              @for (engineer of engineers; track engineer.id) {
+                <option [value]="engineer.id">{{ engineer.name }}</option>
+              }
+            </select>
+            <button (click)="assignEngineer()" [disabled]="!selectedEngineerId || isUpdating">
+              @if(isUpdating) {
+                <span>جاري التحديث...</span>
+              } @else {
+                <span>تعيين</span>
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+@if (isLoading()) {
+  <p class="loading-text">جاري تحميل تفاصيل الطلب...</p>
+}
+
+@if (!isLoading() && !ticket()) {
+  <p class="error-text">لم يتم العثور على الطلب المطلوب.</p>
+}

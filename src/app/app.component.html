@@ -1,10 +1,23 @@
-<div class="main">
-  <img src="https://angular.io/assets/images/logos/angular/angular.svg" alt="Angular Logo" width="120">
-  <h1>Welcome to your Angular App!</h1>
-  <p>This is a minimal template for Dyad.sh with Select UI to Edit support.</p>
-  <p>Edit <code>src/app/app.component.ts</code> to get started.</p>
-  
-  <app-hello></app-hello>
-</div>
+<nav class="navbar">
+  <div class="navbar-container">
+    <a routerLink="/" class="navbar-brand">نظام إدارة الأعطال</a>
+    <div class="navbar-links">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">إبلاغ عن عطل</a>
+      @if (isLoggedIn()) {
+        <a routerLink="/tickets" routerLinkActive="active">قائمة الأعطال</a>
+        <a routerLink="/engineers" routerLinkActive="active">إدارة المهندسين</a>
+        <button (click)="logout()">تسجيل الخروج</button>
+      } @else {
+        <a routerLink="/login" routerLinkActive="active">تسجيل الدخول</a>
+      }
+    </div>
+  </div>
+</nav>
 
+<main class="main-content">
+  <router-outlet></router-outlet>
+</main>
 
+<footer class="footer">
+  <p>&copy; 2024 جميع الحقوق محفوظة.</p>
+</footer>

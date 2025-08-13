@@ -1,0 +1,57 @@
+<div class="engineers-container">
+  <h2>إدارة المهندسين</h2>
+  <p>أضف أو احذف المهندسين من هذه الصفحة.</p>
+
+  <div class="add-engineer-form">
+    <h3>إضافة مهندس جديد</h3>
+    <form (ngSubmit)="addEngineer()">
+      <div class="form-group">
+        <label for="newEngineerName">اسم المهندس</label>
+        <input 
+          type="text" 
+          id="newEngineerName" 
+          [(ngModel)]="newEngineerName" 
+          name="newEngineerName"
+          placeholder="مثال: عبد الرحمن الغامدي"
+          required>
+      </div>
+      <button type="submit" [disabled]="isAdding || !newEngineerName.trim()">
+        @if (isAdding) {
+          <span>جاري الإضافة...</span>
+        } @else {
+          <span>إضافة مهندس</span>
+        }
+      </button>
+    </form>
+  </div>
+
+  <div class="engineers-list">
+    <h3>قائمة المهندسين الحاليين</h3>
+    @if (isLoading) {
+      <p>جاري تحميل قائمة المهندسين...</p>
+    } @else if (engineers.length === 0) {
+      <p>لا يوجد مهندسون حاليًا. قم بإضافة مهندس جديد من النموذج أعلاه.</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>اسم المهندس</th>
+            <th>تاريخ الإضافة</th>
+            <th>إجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (engineer of engineers; track engineer.id) {
+            <tr>
+              <td>{{ engineer.name }}</td>
+              <td>{{ engineer.created_at | date:'yyyy-MM-dd h:mm a' }}</td>
+              <td>
+                <button class="delete-btn" (click)="deleteEngineer(engineer.id, engineer.name)">حذف</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
