@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { SupabaseAuthUiModule } from '@supabase/auth-ui-angular';
+import { SupabaseAuthUiModule } from 'supabase-auth-ui-angular';
 import { supabase } from '../../integrations/supabase/client';
 
 @Component({
