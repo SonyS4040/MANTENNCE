@@ -12,12 +12,6 @@ import { supabase } from '../../integrations/supabase/client';
 })
 export class CreateTicketComponent {
   ticketForm: FormGroup;
-  deviceTypes = [
-    'جهاز ليزر لإزالة الشعر',
-    'جهاز كافيتيشن للتخسيس',
-    'جهاز شد الترهلات',
-    'جهاز علاج طبيعي بالموجات فوق الصوتية'
-  ];
   selectedFile: File | null = null;
   isSubmitting = false;
 

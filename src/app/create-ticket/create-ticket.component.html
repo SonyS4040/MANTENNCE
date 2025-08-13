@@ -42,14 +42,9 @@
       <legend>معلومات الجهاز والعطل</legend>
       <div class="form-group">
         <label for="deviceType">نوع الجهاز</label>
-        <select id="deviceType" formControlName="deviceType">
-          <option value="" disabled>اختر نوع الجهاز</option>
-          @for (device of deviceTypes; track device) {
-            <option [value]="device">{{ device }}</option>
-          }
-        </select>
+        <input type="text" id="deviceType" formControlName="deviceType" placeholder="مثال: جهاز ليزر لإزالة الشعر">
         @if (ticketForm.get('deviceType')?.invalid && ticketForm.get('deviceType')?.touched) {
-          <div class="error">الرجاء اختيار نوع الجهاز.</div>
+          <div class="error">الرجاء إدخال نوع الجهاز.</div>
         }
       </div>
       <div class="form-group">
