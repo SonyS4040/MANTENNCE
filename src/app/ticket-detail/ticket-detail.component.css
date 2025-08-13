@@ -69,9 +69,9 @@
 .priority-عادي { background-color: #5cb85c; }
 
 .status-مفتوح { background-color: #0275d8; }
-.status-قيد { background-color: #5bc0de; }
-.status-تم { background-color: #5cb85c; }
-.status-لم { background-color: #d9534f; }
+.status-قيد\ المعالجة { background-color: #5bc0de; }
+.status-تم\ الإصلاح { background-color: #5cb85c; }
+.status-لم\ يتم\ الإصلاح { background-color: #d9534f; }
 .status-معلق { background-color: #f0ad4e; }
 
 .detail-section {
@@ -130,4 +130,49 @@
 
 .attachment-link:hover {
   background-color: #005f73;
+}
+
+/* Status Update Form Styles */
+.update-section {
+  background-color: #eef7f7;
+  padding: 1.5rem;
+  border-radius: 5px;
+  border: 1px solid #d1e7e7;
+}
+
+.status-form {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.status-form select {
+  flex-grow: 1;
+  padding: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: 'Cairo', sans-serif;
+}
+
+.status-form button {
+  padding: 0.8rem 1.5rem;
+  background-color: #ee9b00;
+  color: #001219;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.status-form button:hover {
+  background-color: #ca8300;
+}
+
+.status-form button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  color: #666;
 }

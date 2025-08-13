@@ -5,34 +5,53 @@
     <p class="loading-message">جاري تحميل تفاصيل العطل...</p>
   } @else if (error) {
     <div class="error-message">{{ error }}</div>
-  } @else if (ticket) {
+  } @else if (ticket()) {
     <header class="ticket-header">
-      <h1>تفاصيل العطل رقم: {{ ticket.ticket_ref }}</h1>
+      <h1>تفاصيل العطل رقم: {{ ticket()!.ticket_ref }}</h1>
       <div class="header-meta">
-        <span class="status" [ngClass]="'status-' + ticket.status">{{ ticket.status }}</span>
-        <span class="priority" [ngClass]="'priority-' + ticket.priority">{{ ticket.priority }}</span>
+        <span class="status" [ngClass]="'status-' + ticket()!.status">{{ ticket()!.status }}</span>
+        <span class="priority" [ngClass]="'priority-' + ticket()!.priority">{{ ticket()!.priority }}</span>
       </div>
     </header>
 
     <div class="ticket-content">
+      
+      <div class="detail-section update-section">
+        <h3>تحديث حالة العطل</h3>
+        <form [formGroup]="statusUpdateForm" (ngSubmit)="updateTicketStatus()" class="status-form">
+          <select formControlName="newStatus">
+            @for(status of availableStatuses; track status) {
+              <option [value]="status">{{ status }}</option>
+            }
+          </select>
+          <button type="submit" [disabled]="isUpdating || statusUpdateForm.invalid || ticket()!.status === statusUpdateForm.value.newStatus">
+            @if(isUpdating) {
+              <span>جاري التحديث...</span>
+            } @else {
+              <span>تحديث الحالة</span>
+            }
+          </button>
+        </form>
+      </div>
+
       <div class="detail-section">
         <h3>معلومات العميل</h3>
         <div class="info-grid">
           <div class="info-item">
             <strong>اسم العميل:</strong>
-            <p>{{ ticket.customer_name }}</p>
+            <p>{{ ticket()!.customer_name }}</p>
           </div>
           <div class="info-item">
             <strong>رقم الهاتف:</strong>
-            <p>{{ ticket.customer_phone }}</p>
+            <p>{{ ticket()!.customer_phone }}</p>
           </div>
           <div class="info-item">
             <strong>البريد الإلكتروني:</strong>
-            <p>{{ ticket.customer_email }}</p>
+            <p>{{ ticket()!.customer_email }}</p>
           </div>
           <div class="info-item full-width">
             <strong>عنوان المنشأة:</strong>
-            <p>{{ ticket.customer_address }}</p>
+            <p>{{ ticket()!.customer_address }}</p>
           </div>
         </div>
       </div>
@@ -42,27 +61,27 @@
         <div class="info-grid">
           <div class="info-item">
             <strong>نوع الجهاز:</strong>
-            <p>{{ ticket.device_type }}</p>
+            <p>{{ ticket()!.device_type }}</p>
           </div>
           <div class="info-item">
             <strong>الرقم التسلسلي:</strong>
-            <p>{{ ticket.serial_number || 'غير متوفر' }}</p>
+            <p>{{ ticket()!.serial_number || 'غير متوفر' }}</p>
           </div>
           <div class="info-item full-width">
             <strong>وصف العطل:</strong>
-            <p class="description">{{ ticket.fault_description }}</p>
+            <p class="description">{{ ticket()!.fault_description }}</p>
           </div>
            <div class="info-item">
             <strong>تاريخ الإنشاء:</strong>
-            <p>{{ ticket.created_at | date:'yyyy/MM/dd hh:mm a' }}</p>
+            <p>{{ ticket()!.created_at | date:'yyyy/MM/dd hh:mm a' }}</p>
           </div>
         </div>
       </div>
 
-      @if (ticket.attachment_url) {
+      @if (ticket()!.attachment_url) {
         <div class="detail-section">
           <h3>المرفقات</h3>
-          <a [href]="ticket.attachment_url" target="_blank" rel="noopener noreferrer" class="attachment-link">
+          <a [href]="ticket()!.attachment_url" target="_blank" rel="noopener noreferrer" class="attachment-link">
             عرض المرفق
           </a>
         </div>
