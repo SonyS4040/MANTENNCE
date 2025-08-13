@@ -17,29 +17,47 @@
     <div class="ticket-content">
       
       <div class="detail-section update-section">
-        <h3>تحديث حالة العطل</h3>
-        <form [formGroup]="statusUpdateForm" (ngSubmit)="updateTicketStatus()" class="status-form">
-          <select formControlName="newStatus">
-            @for(status of availableStatuses; track status) {
-              <option [value]="status">{{ status }}</option>
-            }
-          </select>
-          <button type="submit" [disabled]="isUpdating || statusUpdateForm.invalid || ticket()!.status === statusUpdateForm.value.newStatus">
-            @if(isUpdating) {
-              <span>جاري التحديث...</span>
-            } @else {
-              <span>تحديث الحالة</span>
-            }
-          </button>
-        </form>
+        <h3>تحديثات العطل</h3>
+        <div class="update-forms">
+          <!-- Status Update Form -->
+          <form [formGroup]="statusUpdateForm" (ngSubmit)="updateTicketStatus()" class="status-form">
+            <label for="newStatus">تحديث الحالة:</label>
+            <select id="newStatus" formControlName="newStatus">
+              @for(status of availableStatuses; track status) {
+                <option [value]="status">{{ status }}</option>
+              }
+            </select>
+            <button type="submit" [disabled]="isUpdating || statusUpdateForm.invalid || ticket()!.status === statusUpdateForm.value.newStatus">
+              @if(isUpdating) { <span>جاري...</span> } @else { <span>تحديث</span> }
+            </button>
+          </form>
+
+          <!-- Engineer Assign Form -->
+          <form [formGroup]="engineerAssignForm" (ngSubmit)="assignEngineer()" class="status-form">
+            <label for="engineerId">تعيين مهندس:</label>
+            <select id="engineerId" formControlName="engineerId">
+              <option [ngValue]="null" disabled>اختر مهندس...</option>
+              @for(engineer of availableEngineers(); track engineer.id) {
+                <option [value]="engineer.id">{{ engineer.name }}</option>
+              }
+            </select>
+            <button type="submit" [disabled]="isAssigning || engineerAssignForm.invalid || ticket()!.assigned_engineer_id === engineerAssignForm.value.engineerId">
+              @if(isAssigning) { <span>جاري...</span> } @else { <span>تعيين</span> }
+            </button>
+          </form>
+        </div>
       </div>
 
       <div class="detail-section">
-        <h3>معلومات العميل</h3>
+        <h3>معلومات العميل والمهندس</h3>
         <div class="info-grid">
           <div class="info-item">
             <strong>اسم العميل:</strong>
             <p>{{ ticket()!.customer_name }}</p>
+          </div>
+          <div class="info-item">
+            <strong>المهندس المسؤول:</strong>
+            <p>{{ ticket()?.engineers?.name || 'لم يتم التعيين بعد' }}</p>
           </div>
           <div class="info-item">
             <strong>رقم الهاتف:</strong>
