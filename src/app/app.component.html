@@ -1,23 +1,7 @@
-<nav class="navbar">
-  <div class="navbar-container">
-    <a routerLink="/" class="navbar-brand">نظام إدارة الأعطال</a>
-    <div class="navbar-links">
-      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">إبلاغ عن عطل</a>
-      @if (isLoggedIn()) {
-        <a routerLink="/tickets" routerLinkActive="active">قائمة الأعطال</a>
-        <a routerLink="/engineers" routerLinkActive="active">إدارة المهندسين</a>
-        <button (click)="logout()">تسجيل الخروج</button>
-      } @else {
-        <a routerLink="/login" routerLinkActive="active">تسجيل الدخول</a>
-      }
-    </div>
-  </div>
-</nav>
-
-<main class="main-content">
-  <router-outlet></router-outlet>
-</main>
-
-<footer class="footer">
-  <p>&copy; 2024 جميع الحقوق محفوظة.</p>
-</footer>
+<div class="app-container">
+  <app-header></app-header>
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+  <app-footer></app-footer>
+</div>
