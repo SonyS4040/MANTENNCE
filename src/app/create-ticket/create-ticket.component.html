@@ -77,6 +77,12 @@
       </div>
     </fieldset>
 
-    <button type="submit" class="submit-btn" [disabled]="ticketForm.invalid">إرسال الطلب</button>
+    <button type="submit" class="submit-btn" [disabled]="ticketForm.invalid || isSubmitting">
+      @if (isSubmitting) {
+        <span>جاري الإرسال...</span>
+      } @else {
+        <span>إرسال الطلب</span>
+      }
+    </button>
   </form>
 </div>
