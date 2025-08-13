@@ -132,18 +132,34 @@
   background-color: #005f73;
 }
 
-/* Status Update Form Styles */
+/* Actions Grid */
+.actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .actions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Update Form Styles */
 .update-section {
   background-color: #eef7f7;
   padding: 1.5rem;
   border-radius: 5px;
   border: 1px solid #d1e7e7;
+  height: 100%;
 }
 
 .status-form {
   display: flex;
+  flex-direction: column;
   gap: 1rem;
-  align-items: center;
+  height: 100%;
 }
 
 .status-form select {
@@ -165,6 +181,7 @@
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.3s;
+  margin-top: auto; /* Pushes button to the bottom */
 }
 
 .status-form button:hover {

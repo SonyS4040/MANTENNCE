@@ -3,7 +3,12 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { supabase } from '../../integrations/supabase/client';
 import { Ticket } from '../tickets-list/tickets-list.component';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+
+export interface Engineer {
+  id: string;
+  name: string;
+}
 
 export interface TicketDetail extends Ticket {
   customer_phone: string;
@@ -12,6 +17,8 @@ export interface TicketDetail extends Ticket {
   serial_number: string | null;
   fault_description: string;
   attachment_url: string | null;
+  assigned_engineer_id: string | null;
+  engineers: { name: string } | null; // For joined data
 }
 
 @Component({
@@ -23,11 +30,14 @@ export interface TicketDetail extends Ticket {
 })
 export class TicketDetailComponent implements OnInit {
   ticket = signal<TicketDetail | null>(null);
+  engineers = signal<Engineer[]>([]);
   isLoading = true;
   error: string | null = null;
-  isUpdating = false;
+  isUpdatingStatus = false;
+  isAssigningEngineer = false;
 
   statusUpdateForm: FormGroup;
+  engineerAssignmentForm: FormGroup;
   availableStatuses = ['مفتوح', 'قيد المعالجة', 'تم الإصلاح', 'لم يتم الإصلاح', 'معلق'];
 
   private route = inject(ActivatedRoute);
@@ -37,12 +47,16 @@ export class TicketDetailComponent implements OnInit {
     this.statusUpdateForm = this.fb.group({
       newStatus: ['']
     });
+    this.engineerAssignmentForm = this.fb.group({
+      engineerId: [null, Validators.required]
+    });
   }
 
   ngOnInit(): void {
     const ticketId = this.route.snapshot.paramMap.get('id');
     if (ticketId) {
       this.fetchTicketDetails(ticketId);
+      this.fetchEngineers();
     } else {
       this.error = 'لم يتم العثور على معرف العطل.';
       this.isLoading = false;
@@ -55,15 +69,17 @@ export class TicketDetailComponent implements OnInit {
     try {
       const { data, error } = await supabase
         .from('tickets')
-        .select('*')
+        .select('*, engineers(name)')
         .eq('id', id)
         .single();
 
       if (error) throw error;
       
       if (data) {
-        this.ticket.set(data as TicketDetail);
-        this.statusUpdateForm.patchValue({ newStatus: data.status });
+        const ticketData = data as TicketDetail;
+        this.ticket.set(ticketData);
+        this.statusUpdateForm.patchValue({ newStatus: ticketData.status });
+        this.engineerAssignmentForm.patchValue({ engineerId: ticketData.assigned_engineer_id });
       } else {
         this.error = 'لم يتم العثور على العطل المطلوب.';
       }
@@ -76,10 +92,25 @@ export class TicketDetailComponent implements OnInit {
     }
   }
 
-  async updateTicketStatus() {
-    if (!this.ticket() || this.isUpdating) return;
+  async fetchEngineers() {
+    try {
+      const { data, error } = await supabase
+        .from('engineers')
+        .select('id, name')
+        .order('name');
+      
+      if (error) throw error;
+      this.engineers.set(data || []);
+    } catch (err: any) {
+      console.error('Error fetching engineers:', err);
+      this.error = 'حدث خطأ في جلب قائمة المهندسين.';
+    }
+  }
 
-    this.isUpdating = true;
+  async updateTicketStatus() {
+    if (!this.ticket() || this.isUpdatingStatus) return;
+
+    this.isUpdatingStatus = true;
     const newStatus = this.statusUpdateForm.value.newStatus;
     const ticketId = this.ticket()!.id;
 
@@ -91,13 +122,9 @@ export class TicketDetailComponent implements OnInit {
 
       if (error) throw error;
 
-      // Update the signal to reflect the change instantly
-      this.ticket.update(currentTicket => {
-        if (currentTicket) {
-          return { ...currentTicket, status: newStatus };
-        }
-        return null;
-      });
+      this.ticket.update(currentTicket => 
+        currentTicket ? { ...currentTicket, status: newStatus } : null
+      );
       
       alert('تم تحديث حالة العطل بنجاح!');
 
@@ -105,7 +132,35 @@ export class TicketDetailComponent implements OnInit {
       console.error('Error updating status:', err);
       alert(`حدث خطأ أثناء تحديث الحالة: ${err.message}`);
     } finally {
-      this.isUpdating = false;
+      this.isUpdatingStatus = false;
+    }
+  }
+
+  async assignEngineer() {
+    if (!this.ticket() || this.engineerAssignmentForm.invalid || this.isAssigningEngineer) return;
+
+    this.isAssigningEngineer = true;
+    const engineerId = this.engineerAssignmentForm.value.engineerId;
+    const ticketId = this.ticket()!.id;
+
+    try {
+      const { data, error } = await supabase
+        .from('tickets')
+        .update({ assigned_engineer_id: engineerId })
+        .eq('id', ticketId)
+        .select('*, engineers(name)')
+        .single();
+
+      if (error) throw error;
+
+      this.ticket.set(data as TicketDetail);
+      alert('تم تعيين المهندس بنجاح!');
+
+    } catch (err: any) {
+      console.error('Error assigning engineer:', err);
+      alert(`حدث خطأ أثناء تعيين المهندس: ${err.message}`);
+    } finally {
+      this.isAssigningEngineer = false;
     }
   }
 }
