@@ -68,8 +68,19 @@ export class CreateTicketComponent {
         attachmentUrl = data.publicUrl;
       }
 
-      // 2. Prepare data for insertion
-      const ticketData = { ...this.ticketForm.value, attachment_url: attachmentUrl };
+      // 2. Prepare data for insertion with correct snake_case keys
+      const formValue = this.ticketForm.value;
+      const ticketData = {
+        customer_name: formValue.customerName,
+        customer_phone: formValue.customerPhone,
+        customer_email: formValue.customerEmail,
+        customer_address: formValue.customerAddress,
+        device_type: formValue.deviceType,
+        serial_number: formValue.serialNumber,
+        fault_description: formValue.faultDescription,
+        priority: formValue.priority,
+        attachment_url: attachmentUrl
+      };
 
       // 3. Insert data into the 'tickets' table
       const { error: insertError } = await supabase.from('tickets').insert([ticketData]);
