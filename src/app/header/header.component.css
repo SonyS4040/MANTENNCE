@@ -22,6 +22,7 @@ nav ul {
   list-style: none;
   display: flex;
   gap: 1.5rem;
+  align-items: center;
 }
 
 nav a {
@@ -32,4 +33,32 @@ nav a {
 
 nav a:hover {
   color: #0a9396;
+}
+
+.login-btn, .logout-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  border: 2px solid #0a9396;
+  background-color: transparent;
+  color: #0a9396;
+  font-family: 'Cairo', sans-serif;
+  font-size: 1rem;
+}
+
+.login-btn:hover {
+  background-color: #0a9396;
+  color: white;
+}
+
+.logout-btn {
+  border-color: #d9534f;
+  color: #d9534f;
+}
+
+.logout-btn:hover {
+  background-color: #d9534f;
+  color: white;
 }

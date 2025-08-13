@@ -1,0 +1,21 @@
+<div class="login-container">
+  <h2>تسجيل دخول الموظفين</h2>
+  <p>الرجاء تسجيل الدخول للوصول إلى لوحة تحكم الأعطال.</p>
+  <div class="auth-form">
+    <supabase-auth-ui
+      [supabaseClient]="supabase"
+      [providers]="[]"
+      [appearance]="{
+        theme: 'default',
+        variables: {
+          default: {
+            colors: {
+              brand: '#0a9396',
+              brandAccent: '#005f73'
+            }
+          }
+        }
+      }"
+    />
+  </div>
+</div>
