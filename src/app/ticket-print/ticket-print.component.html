@@ -1,0 +1,98 @@
+<div class="print-container">
+  <div class="page-actions">
+    <a [routerLink]="['/tickets', ticket()?.id]" class="back-link">&larr; العودة إلى تفاصيل العطل</a>
+    <button (click)="printReport()" class="print-btn">طباعة</button>
+  </div>
+
+  @if (isLoading) {
+    <p class="loading-message">جاري تحميل التقرير...</p>
+  } @else if (error) {
+    <div class="error-message">{{ error }}</div>
+  } @else if (ticket()) {
+    <div class="report-page" id="report">
+      <header class="report-header">
+        <div class="logo">
+          <h2>أواسيس فارما جروب</h2>
+          <p>لصيانة الأجهزة الطبية</p>
+        </div>
+        <div class="report-title">
+          <h1>تقرير صيانة فني</h1>
+        </div>
+      </header>
+
+      <section class="meta-info">
+        <div><strong>الرقم المرجعي:</strong> {{ ticket()!.ticket_ref }}</div>
+        <div><strong>تاريخ الإنشاء:</strong> {{ ticket()!.created_at | date:'yyyy/MM/dd' }}</div>
+        <div><strong>حالة الطلب:</strong> {{ ticket()!.status }}</div>
+      </section>
+
+      <section class="report-section">
+        <h3>1. بيانات العميل</h3>
+        <table class="info-table">
+          <tr>
+            <th>اسم العميل</th>
+            <td>{{ ticket()!.customer_name }}</td>
+            <th>رقم الهاتف</th>
+            <td>{{ ticket()!.customer_phone }}</td>
+          </tr>
+          <tr>
+            <th>البريد الإلكتروني</th>
+            <td>{{ ticket()!.customer_email }}</td>
+            <th>عنوان المنشأة</th>
+            <td>{{ ticket()!.customer_address }}</td>
+          </tr>
+        </table>
+      </section>
+
+      <section class="report-section">
+        <h3>2. بيانات الجهاز</h3>
+        <table class="info-table">
+          <tr>
+            <th>نوع الجهاز</th>
+            <td>{{ ticket()!.device_type }}</td>
+            <th>الرقم التسلسلي</th>
+            <td>{{ ticket()!.serial_number || 'غير متوفر' }}</td>
+          </tr>
+          <tr>
+            <th class="description-header">وصف العطل المبلغ عنه</th>
+            <td colspan="3" class="description-cell">{{ ticket()!.fault_description }}</td>
+          </tr>
+        </table>
+      </section>
+
+      <section class="report-section">
+        <h3>3. التقرير الفني</h3>
+        <div class="notes-section">
+          <h4>ملاحظات الفحص الفني المبدئي:</h4>
+          <p class="notes-content">{{ ticket()!.technical_inspection_notes || 'لا توجد ملاحظات.' }}</p>
+        </div>
+        <div class="notes-section">
+          <h4>الإجراءات التي تمت وقطع الغيار المستخدمة:</h4>
+          <p class="notes-content">{{ ticket()!.repair_notes || 'لا توجد ملاحظات.' }}</p>
+        </div>
+        <div class="notes-section">
+          <h4>ملاحظات تسليم الجهاز للعميل:</h4>
+          <p class="notes-content">{{ ticket()!.handover_notes || 'لا توجد ملاحظات.' }}</p>
+        </div>
+      </section>
+
+      <section class="report-section signatures">
+        <div class="signature-box">
+          <p><strong>المهندس المسؤول:</strong></p>
+          <p>{{ ticket()!.engineers?.name || 'غير معين' }}</p>
+          <p class="signature-line">التوقيع: .........................................</p>
+        </div>
+        <div class="signature-box">
+          <p><strong>استلام العميل:</strong></p>
+          <p>{{ ticket()!.customer_name }}</p>
+          <p class="signature-line">التوقيع: .........................................</p>
+        </div>
+      </section>
+
+      <footer class="report-footer">
+        <p>جميع الحقوق محفوظة لشركة أواسيس فارما جروب &copy; {{ '' | date:'yyyy' }}</p>
+        <p>هذا التقرير تم إنشاؤه بواسطة نظام إدارة الصيانة.</p>
+      </footer>
+    </div>
+  }
+</div>
