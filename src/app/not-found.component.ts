@@ -18,9 +18,9 @@ import { RouterLink } from '@angular/router';
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      height: 100vh;
       text-align: center;
       font-family: Arial, sans-serif;
+      padding: 4rem 1rem;
     }
     h1 {
       font-size: 3rem;
