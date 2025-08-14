@@ -4,8 +4,37 @@ import { Component } from '@angular/core';
   selector: 'app-root',
   standalone: true,
   imports: [],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  template: `
+    <div class="main">
+      <img src="https://angular.io/assets/images/logos/angular/angular.svg" alt="Angular Logo" width="120">
+      <h1>Welcome to your Angular App!</h1>
+      <p>This is a minimal template for Dyad.sh.</p>
+      <p>Everything should be working correctly now.</p>
+    </div>
+  `,
+  styles: [`
+    .main {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 2rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #fafafa;
+    }
+    img {
+      margin-bottom: 2rem;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 1rem;
+    }
+    p {
+      color: #666;
+    }
+  `]
 })
 export class AppComponent {
   title = 'dyad-angular-template';
