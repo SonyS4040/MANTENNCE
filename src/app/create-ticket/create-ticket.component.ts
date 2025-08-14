@@ -19,7 +19,6 @@ export class CreateTicketComponent {
     this.ticketForm = this.fb.group({
       customerName: ['', Validators.required],
       customerPhone: ['', Validators.required],
-      customerEmail: ['', [Validators.required, Validators.email]],
       customerAddress: ['', Validators.required],
       deviceType: ['', Validators.required],
       serialNumber: [''],
@@ -67,7 +66,6 @@ export class CreateTicketComponent {
       const ticketData = {
         customer_name: formValue.customerName,
         customer_phone: formValue.customerPhone,
-        customer_email: formValue.customerEmail,
         customer_address: formValue.customerAddress,
         device_type: formValue.deviceType,
         serial_number: formValue.serialNumber,

@@ -12,7 +12,6 @@ export interface Engineer {
 
 export interface TicketDetail extends Ticket {
   customer_phone: string;
-  customer_email: string;
   customer_address: string;
   serial_number: string | null;
   fault_description: string;

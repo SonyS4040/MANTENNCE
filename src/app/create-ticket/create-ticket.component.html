@@ -20,16 +20,6 @@
         }
       </div>
       <div class="form-group">
-        <label for="customerEmail">البريد الإلكتروني</label>
-        <input type="email" id="customerEmail" formControlName="customerEmail">
-        @if (ticketForm.get('customerEmail')?.touched && ticketForm.get('customerEmail')?.hasError('required')) {
-          <div class="error">حقل البريد الإلكتروني مطلوب.</div>
-        }
-        @if (ticketForm.get('customerEmail')?.touched && ticketForm.get('customerEmail')?.hasError('email')) {
-          <div class="error">الرجاء إدخال بريد إلكتروني صحيح.</div>
-        }
-      </div>
-      <div class="form-group">
         <label for="customerAddress">عنوان المنشأة</label>
         <textarea id="customerAddress" formControlName="customerAddress" rows="3"></textarea>
         @if (ticketForm.get('customerAddress')?.invalid && ticketForm.get('customerAddress')?.touched) {

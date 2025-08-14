@@ -90,7 +90,6 @@
         <div class="info-grid">
           <div class="info-item"><strong>اسم العميل:</strong><p>{{ ticket()!.customer_name }}</p></div>
           <div class="info-item"><strong>رقم الهاتف:</strong><p>{{ ticket()!.customer_phone }}</p></div>
-          <div class="info-item"><strong>البريد الإلكتروني:</strong><p>{{ ticket()!.customer_email }}</p></div>
           <div class="info-item"><strong>المهندس المسؤول:</strong><p>{{ ticket()!.engineers?.name || 'لم يتم التعيين بعد' }}</p></div>
           <div class="info-item full-width"><strong>عنوان المنشأة:</strong><p>{{ ticket()!.customer_address }}</p></div>
         </div>
