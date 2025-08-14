@@ -2,22 +2,27 @@
   <h2>إدارة مهندسي الصيانة</h2>
 
   <div class="add-engineer-form">
-    <h3>إضافة مهندس جديد</h3>
-    <form [formGroup]="addEngineerForm" (ngSubmit)="addEngineer()">
+    <h3>@if (editingEngineer()) { تعديل بيانات المهندس } @else { إضافة مهندس جديد }</h3>
+    <form [formGroup]="engineerForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
         <label for="name">اسم المهندس</label>
-        <input type="text" id="name" formControlName="name" placeholder="أدخل اسم المهندس الجديد">
-        @if (addEngineerForm.get('name')?.invalid && addEngineerForm.get('name')?.touched) {
+        <input type="text" id="name" formControlName="name" placeholder="أدخل اسم المهندس">
+        @if (engineerForm.get('name')?.invalid && engineerForm.get('name')?.touched) {
           <div class="error">حقل الاسم مطلوب.</div>
         }
       </div>
-      <button type="submit" class="submit-btn" [disabled]="isSubmitting || addEngineerForm.invalid">
-        @if (isSubmitting) {
-          <span>جاري الإضافة...</span>
-        } @else {
-          <span>إضافة مهندس</span>
+      <div class="form-buttons">
+        <button type="submit" class="submit-btn" [disabled]="isSubmitting || engineerForm.invalid">
+          @if (isSubmitting) {
+            <span>جاري الحفظ...</span>
+          } @else {
+            <span>@if(editingEngineer()){ حفظ التعديلات } @else { إضافة مهندس }</span>
+          }
+        </button>
+        @if (editingEngineer()) {
+          <button type="button" (click)="resetForm()" class="cancel-btn">إلغاء التعديل</button>
         }
-      </button>
+      </div>
     </form>
   </div>
 
@@ -41,7 +46,8 @@
           @for (engineer of engineers(); track engineer.id) {
             <tr>
               <td>{{ engineer.name }}</td>
-              <td>
+              <td class="actions">
+                <button (click)="startEdit(engineer)" class="edit-btn">تعديل</button>
                 <button (click)="deleteEngineer(engineer.id, engineer.name)" class="delete-btn">حذف</button>
               </td>
             </tr>

@@ -13,13 +13,14 @@ import { Engineer } from '../ticket-detail/ticket-detail.component';
 })
 export class EngineersComponent implements OnInit {
   engineers = signal<Engineer[]>([]);
+  editingEngineer = signal<Engineer | null>(null);
   isLoading = true;
   error: string | null = null;
-  addEngineerForm: FormGroup;
+  engineerForm: FormGroup;
   isSubmitting = false;
 
   constructor(private fb: FormBuilder) {
-    this.addEngineerForm = this.fb.group({
+    this.engineerForm = this.fb.group({
       name: ['', Validators.required]
     });
   }
@@ -46,43 +47,71 @@ export class EngineersComponent implements OnInit {
     }
   }
 
-  async addEngineer() {
-    if (this.addEngineerForm.invalid) {
-      this.addEngineerForm.markAllAsTouched();
+  async onSubmit() {
+    if (this.engineerForm.invalid) {
+      this.engineerForm.markAllAsTouched();
       return;
     }
 
     this.isSubmitting = true;
-    const { name } = this.addEngineerForm.value;
+    
+    if (this.editingEngineer()) {
+      await this.updateEngineer();
+    } else {
+      await this.addEngineer();
+    }
 
+    this.isSubmitting = false;
+  }
+
+  private async addEngineer() {
+    const { name } = this.engineerForm.value;
     try {
       const { error } = await supabase.from('engineers').insert([{ name }]);
       if (error) throw error;
-
       alert('تمت إضافة المهندس بنجاح!');
-      this.addEngineerForm.reset();
-      await this.fetchEngineers(); // Refresh the list
-
+      this.resetForm();
+      await this.fetchEngineers();
     } catch (err: any) {
       alert(`حدث خطأ أثناء إضافة المهندس: ${err.message}`);
-    } finally {
-      this.isSubmitting = false;
     }
+  }
+
+  private async updateEngineer() {
+    const { name } = this.engineerForm.value;
+    const engineerId = this.editingEngineer()!.id;
+    try {
+      const { error } = await supabase.from('engineers').update({ name }).eq('id', engineerId);
+      if (error) throw error;
+      alert('تم تعديل اسم المهندس بنجاح!');
+      this.resetForm();
+      await this.fetchEngineers();
+    } catch (err: any) {
+      alert(`حدث خطأ أثناء تعديل المهندس: ${err.message}`);
+    }
+  }
+
+  startEdit(engineer: Engineer) {
+    this.editingEngineer.set(engineer);
+    this.engineerForm.patchValue({ name: engineer.name });
+  }
+
+  resetForm() {
+    this.editingEngineer.set(null);
+    this.engineerForm.reset();
   }
 
   async deleteEngineer(id: string, name: string) {
     if (!confirm(`هل أنت متأكد من رغبتك في حذف المهندس "${name}"؟`)) {
       return;
     }
-
     try {
       const { error } = await supabase.from('engineers').delete().eq('id', id);
       if (error) throw error;
-
       alert('تم حذف المهندس بنجاح.');
-      await this.fetchEngineers(); // Refresh the list
-
-    } catch (err: any) {
+      await this.fetchEngineers();
+    } catch (err: any)
+      {
       alert(`حدث خطأ أثناء حذف المهندس: ${err.message}`);
     }
   }

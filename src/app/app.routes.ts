@@ -5,6 +5,7 @@ import { TicketsListComponent } from './tickets-list/tickets-list.component';
 import { LoginComponent } from './login/login.component';
 import { authGuard } from './auth.guard';
 import { TicketDetailComponent } from './ticket-detail/ticket-detail.component';
+import { EngineersComponent } from './engineers/engineers.component';
 
 export const routes: Routes = [
     { path: '', component: HomeComponent, title: 'الصفحة الرئيسية - أواسيس فارما' },
@@ -19,6 +20,12 @@ export const routes: Routes = [
       path: 'tickets/:id', 
       component: TicketDetailComponent, 
       title: 'تفاصيل العطل - أواسيس فارما',
+      canActivate: [authGuard] 
+    },
+    { 
+      path: 'engineers', 
+      component: EngineersComponent, 
+      title: 'إدارة المهندسين - أواسيس فارما',
       canActivate: [authGuard] 
     },
     { path: 'login', component: LoginComponent, title: 'تسجيل الدخول - أواسيس فارما' }
