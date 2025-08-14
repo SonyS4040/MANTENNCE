@@ -7,9 +7,15 @@
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
+.page-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
 .back-link {
   display: inline-block;
-  margin-bottom: 2rem;
   color: #0a9396;
   font-weight: 600;
   text-decoration: none;
@@ -18,6 +24,22 @@
 
 .back-link:hover {
   color: #005f73;
+}
+
+.print-btn {
+  padding: 0.7rem 1.5rem;
+  background-color: #005f73;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.print-btn:hover {
+  background-color: #004c5a;
 }
 
 .loading-message, .error-message {
@@ -114,7 +136,7 @@
 }
 
 .info-item p.description {
-  white-space: pre-wrap; /* Preserve line breaks in description */
+  white-space: pre-wrap;
 }
 
 .attachment-link {
@@ -132,7 +154,6 @@
   background-color: #005f73;
 }
 
-/* Actions Grid */
 .actions-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -146,7 +167,6 @@
   }
 }
 
-/* Update Form Styles */
 .update-section {
   background-color: #eef7f7;
   padding: 1.5rem;
@@ -181,7 +201,7 @@
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.3s;
-  margin-top: auto; /* Pushes button to the bottom */
+  margin-top: auto;
 }
 
 .status-form button:hover {
@@ -192,4 +212,57 @@
   background-color: #ccc;
   cursor: not-allowed;
   color: #666;
+}
+
+.report-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background-color: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 5px;
+  border: 1px solid #e9ecef;
+}
+
+.report-form .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.report-form label {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.report-form textarea {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: 'Cairo', sans-serif;
+  min-height: 100px;
+}
+
+.save-report-btn {
+  align-self: flex-start;
+  padding: 0.8rem 2rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.save-report-btn:hover {
+  background-color: #218838;
+}
+
+.save-report-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }

@@ -18,7 +18,11 @@ export interface TicketDetail extends Ticket {
   fault_description: string;
   attachment_url: string | null;
   assigned_engineer_id: string | null;
-  engineers: { name: string } | null; // For joined data
+  engineers: { name: string } | null;
+  // New report fields
+  technical_inspection_notes: string | null;
+  repair_notes: string | null;
+  handover_notes: string | null;
 }
 
 @Component({
@@ -35,9 +39,11 @@ export class TicketDetailComponent implements OnInit {
   error: string | null = null;
   isUpdatingStatus = false;
   isAssigningEngineer = false;
+  isSavingReport = false;
 
   statusUpdateForm: FormGroup;
   engineerAssignmentForm: FormGroup;
+  reportForm: FormGroup;
   availableStatuses = ['مفتوح', 'قيد المعالجة', 'تم الإصلاح', 'لم يتم الإصلاح', 'معلق'];
 
   private route = inject(ActivatedRoute);
@@ -49,6 +55,11 @@ export class TicketDetailComponent implements OnInit {
     });
     this.engineerAssignmentForm = this.fb.group({
       engineerId: [null, Validators.required]
+    });
+    this.reportForm = this.fb.group({
+      technical_inspection_notes: [''],
+      repair_notes: [''],
+      handover_notes: ['']
     });
   }
 
@@ -80,6 +91,11 @@ export class TicketDetailComponent implements OnInit {
         this.ticket.set(ticketData);
         this.statusUpdateForm.patchValue({ newStatus: ticketData.status });
         this.engineerAssignmentForm.patchValue({ engineerId: ticketData.assigned_engineer_id });
+        this.reportForm.patchValue({
+          technical_inspection_notes: ticketData.technical_inspection_notes,
+          repair_notes: ticketData.repair_notes,
+          handover_notes: ticketData.handover_notes
+        });
       } else {
         this.error = 'لم يتم العثور على العطل المطلوب.';
       }
@@ -103,7 +119,7 @@ export class TicketDetailComponent implements OnInit {
       this.engineers.set(data || []);
     } catch (err: any) {
       console.error('Error fetching engineers:', err);
-      this.error = 'حدث خطأ في جلب قائمة المهندسين.';
+      // Do not overwrite main error message
     }
   }
 
@@ -161,6 +177,36 @@ export class TicketDetailComponent implements OnInit {
       alert(`حدث خطأ أثناء تعيين المهندس: ${err.message}`);
     } finally {
       this.isAssigningEngineer = false;
+    }
+  }
+
+  async saveReport() {
+    if (!this.ticket() || this.reportForm.invalid || this.isSavingReport) return;
+
+    this.isSavingReport = true;
+    const reportData = this.reportForm.value;
+    const ticketId = this.ticket()!.id;
+
+    try {
+      const { data, error } = await supabase
+        .from('tickets')
+        .update(reportData)
+        .eq('id', ticketId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      this.ticket.update(currentTicket => 
+        currentTicket ? { ...currentTicket, ...reportData } : null
+      );
+      alert('تم حفظ بيانات التقرير الفني بنجاح!');
+
+    } catch (err: any) {
+      console.error('Error saving report:', err);
+      alert(`حدث خطأ أثناء حفظ التقرير: ${err.message}`);
+    } finally {
+      this.isSavingReport = false;
     }
   }
 }
