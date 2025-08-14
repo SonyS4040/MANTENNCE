@@ -1,0 +1,18 @@
+<header class="header">
+  <div class="container">
+    <a routerLink="/" class="logo">أواسيس فارما جروب</a>
+    <nav>
+      <ul>
+        <li><a routerLink="/">الرئيسية</a></li>
+        <li><a routerLink="/create-ticket">إبلاغ عن عطل</a></li>
+        <li><a routerLink="/tickets">متابعة الأعطال</a></li>
+        @if (authService.session()) {
+          <li><a routerLink="/engineers">إدارة المهندسين</a></li>
+          <li><button (click)="authService.signOut()" class="logout-btn">تسجيل الخروج</button></li>
+        } @else {
+          <li><a routerLink="/login" class="login-btn">تسجيل الدخول</a></li>
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
