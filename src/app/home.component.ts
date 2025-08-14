@@ -7,9 +7,8 @@ import { Component } from '@angular/core';
   template: `
     <div class="main">
       <img src="https://angular.io/assets/images/logos/angular/angular.svg" alt="Angular Logo" width="120">
-      <h1>Welcome to your Angular App!</h1>
-      <p>This is a minimal template for Dyad.sh.</p>
-      <p>Routing is now set up and working correctly.</p>
+      <h1>مرحباً بك في نظام التذاكر</h1>
+      <p>استخدم القائمة العلوية لإنشاء تذكرة جديدة.</p>
     </div>
   `,
   styles: [`
