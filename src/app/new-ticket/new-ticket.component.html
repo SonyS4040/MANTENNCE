@@ -1,0 +1,56 @@
+<div class="form-container">
+  <h2>إنشاء تذكرة جديدة</h2>
+  <p>يرجى ملء معلومات العميل وتفاصيل الجهاز.</p>
+  
+  <form [formGroup]="ticketForm" (ngSubmit)="onSubmit()">
+    <h3>معلومات العميل</h3>
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="customer_name">اسم العميل</label>
+        <input id="customer_name" type="text" formControlName="customer_name">
+      </div>
+      <div class="form-field">
+        <label for="customer_phone">رقم الهاتف</label>
+        <input id="customer_phone" type="tel" formControlName="customer_phone">
+      </div>
+      <div class="form-field full-width">
+        <label for="customer_address">العنوان</label>
+        <input id="customer_address" type="text" formControlName="customer_address">
+      </div>
+    </div>
+
+    <h3>تفاصيل الجهاز والعطل</h3>
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="device_type">نوع الجهاز</label>
+        <input id="device_type" type="text" formControlName="device_type">
+      </div>
+      <div class="form-field">
+        <label for="serial_number">الرقم التسلسلي (اختياري)</label>
+        <input id="serial_number" type="text" formControlName="serial_number">
+      </div>
+      <div class="form-field full-width">
+        <label for="fault_description">وصف العطل</label>
+        <textarea id="fault_description" formControlName="fault_description" rows="4"></textarea>
+      </div>
+      <div class="form-field">
+        <label for="priority">الأولوية</label>
+        <select id="priority" formControlName="priority">
+          <option value="عادي">عادي</option>
+          <option value="متوسط">متوسط</option>
+          <option value="عاجل">عاجل</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" [disabled]="ticketForm.invalid || isLoading">
+        {{ isLoading ? 'جاري الإنشاء...' : 'إنشاء تذكرة' }}
+      </button>
+    </div>
+
+    @if (errorMessage) {
+      <div class="error-message">{{ errorMessage }}</div>
+    }
+  </form>
+</div>

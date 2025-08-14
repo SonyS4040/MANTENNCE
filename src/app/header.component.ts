@@ -8,7 +8,10 @@ import { RouterLink } from '@angular/router';
   template: `
     <header class="header">
       <nav>
-        <a routerLink="/" class="logo">Angular App</a>
+        <a routerLink="/" class="logo">نظام التذاكر</a>
+        <div class="nav-links">
+          <a routerLink="/new-ticket" class="nav-link">تذكرة جديدة</a>
+        </div>
       </nav>
     </header>
   `,
@@ -18,6 +21,7 @@ import { RouterLink } from '@angular/router';
       padding: 1rem 2rem;
       color: white;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      direction: rtl;
     }
     nav {
       display: flex;
@@ -29,6 +33,20 @@ import { RouterLink } from '@angular/router';
       font-weight: bold;
       color: white;
       text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+    }
+    .nav-link {
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+    .nav-link:hover {
+      background-color: rgba(255, 255, 255, 0.2);
     }
   `]
 })

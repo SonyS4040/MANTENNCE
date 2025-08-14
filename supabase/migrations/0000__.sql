@@ -1,0 +1,1 @@
+ALTER TABLE public.tickets DROP COLUMN customer_email;
