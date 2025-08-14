@@ -8,6 +8,7 @@ export interface Ticket {
   created_at: string;
   ticket_ref: string;
   customer_name: string;
+  customer_email: string; // Added for linking
   device_type: string;
   priority: string;
   status: string;
@@ -26,9 +27,6 @@ export class TicketsListComponent implements OnInit {
   error: string | null = null;
 
   async ngOnInit() {
-    // This page requires authentication, but for now we'll fetch data
-    // without a logged-in user. This will fail until a user is logged in
-    // because of the RLS policy. This is the next step.
     await this.fetchTickets();
   }
 
@@ -38,11 +36,10 @@ export class TicketsListComponent implements OnInit {
     try {
       const { data, error } = await supabase
         .from('tickets')
-        .select('id, created_at, ticket_ref, customer_name, device_type, priority, status')
+        .select('id, created_at, ticket_ref, customer_name, customer_email, device_type, priority, status')
         .order('created_at', { ascending: false });
 
       if (error) {
-        // This error is expected if no user is logged in.
         if (error.code === '42501') {
              this.error = 'الرجاء تسجيل الدخول لعرض قائمة الأعطال.';
         } else {
@@ -51,7 +48,7 @@ export class TicketsListComponent implements OnInit {
       }
       
       if (data) {
-        this.tickets = data;
+        this.tickets = data as Ticket[];
       }
 
     } catch (err: any) {

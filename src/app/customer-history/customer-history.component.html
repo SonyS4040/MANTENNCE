@@ -1,0 +1,48 @@
+<div class="history-container">
+  @if (isLoading) {
+    <p>جاري تحميل سجل العميل...</p>
+  } @else if (error) {
+    <div class="error-message">{{ error }}</div>
+  } @else if (customerInfo() && tickets().length > 0) {
+    <div class="customer-header">
+      <h2>ملف العميل: {{ customerInfo()!.name }}</h2>
+      <div class="customer-details">
+        <p><strong>البريد الإلكتروني:</strong> {{ customerInfo()!.email }}</p>
+        <p><strong>رقم الهاتف:</strong> {{ customerInfo()!.phone }}</p>
+        <p><strong>العنوان:</strong> {{ customerInfo()!.address }}</p>
+      </div>
+    </div>
+
+    <h3>طلبات الصيانة السابقة</h3>
+    <div class="table-responsive">
+      <table class="tickets-table">
+        <thead>
+          <tr>
+            <th>الرقم المرجعي</th>
+            <th>نوع الجهاز</th>
+            <th>تاريخ الإنشاء</th>
+            <th>الأولوية</th>
+            <th>الحالة</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (ticket of tickets(); track ticket.id) {
+            <tr [routerLink]="['/tickets', ticket.id]" class="ticket-row">
+              <td>{{ ticket.ticket_ref }}</td>
+              <td>{{ ticket.device_type }}</td>
+              <td>{{ ticket.created_at | date:'yyyy/MM/dd hh:mm a' }}</td>
+              <td>
+                <span class="priority" [ngClass]="'priority-' + ticket.priority">{{ ticket.priority }}</span>
+              </td>
+              <td>
+                <span class="status" [ngClass]="'status-' + ticket.status">{{ ticket.status }}</span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+     <p>لا توجد بيانات لعرضها.</p>
+  }
+</div>

@@ -1,4 +1,4 @@
-.tickets-container {
+.history-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
@@ -7,10 +7,34 @@
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-h2 {
-  text-align: center;
-  color: #005f73;
+.customer-header {
+  border-bottom: 2px solid #0a9396;
+  padding-bottom: 1.5rem;
   margin-bottom: 2rem;
+}
+
+.customer-header h2 {
+  color: #005f73;
+  margin-bottom: 1rem;
+}
+
+.customer-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 0.5rem 1.5rem;
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 5px;
+}
+
+.customer-details p {
+  margin: 0;
+  color: #333;
+}
+
+h3 {
+  color: #005f73;
+  margin-bottom: 1.5rem;
 }
 
 .table-responsive {
@@ -26,7 +50,6 @@ h2 {
 .tickets-table th, .tickets-table td {
   padding: 1rem;
   border-bottom: 1px solid #ddd;
-  vertical-align: middle;
 }
 
 .tickets-table thead th {
@@ -35,24 +58,12 @@ h2 {
   font-weight: bold;
 }
 
-.tickets-table tbody tr.ticket-row-container:hover {
+.tickets-table tbody tr:hover {
   background-color: #f1f1f1;
 }
 
-.tickets-table td {
+.ticket-row {
   cursor: pointer;
-}
-
-.tickets-table td a.customer-link {
-  font-weight: 600;
-  color: #005f73;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.tickets-table td a.customer-link:hover {
-  color: #0a9396;
-  text-decoration: underline;
 }
 
 .priority, .status {
