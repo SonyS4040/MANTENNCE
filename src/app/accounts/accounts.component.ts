@@ -45,7 +45,7 @@ export class AccountsComponent implements OnInit {
         if (ticket.engineers) {
           const date = new Date(ticket.created_at);
           const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-          const engineerMonthKey = `${ticket.engineers.name}::${monthKey}`;
+          const engineerMonthKey = `${(ticket.engineers as any).name}::${monthKey}`;
 
           const current = monthlyTotals.get(engineerMonthKey) || { totalCost: 0, ticketCount: 0 };
           current.totalCost += ticket.maintenance_cost || 0;
