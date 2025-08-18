@@ -1,0 +1,36 @@
+<div class="actions-grid">
+  <div class="detail-section update-section">
+    <h3>تحديث حالة العطل</h3>
+    <form [formGroup]="statusUpdateForm" (ngSubmit)="updateTicketStatus()" class="status-form">
+      <select formControlName="newStatus">
+        @for(status of availableStatuses; track status) {
+          <option [value]="status">{{ status }}</option>
+        }
+      </select>
+      @if (statusUpdateForm.value.newStatus === 'تم الإصلاح') {
+        <div class="form-group">
+          <label for="repair_video">رفع فيديو بعد الإصلاح (إجباري)</label>
+          <input type="file" id="repair_video" (change)="onRepairVideoChange($event)" accept="video/*" required>
+        </div>
+      }
+      <button type="submit" [disabled]="isUpdatingStatus() || statusUpdateForm.invalid || ticket.status === statusUpdateForm.value.newStatus">
+        @if(isUpdatingStatus()) { <span>جاري التحديث...</span> } @else { <span>تحديث الحالة</span> }
+      </button>
+    </form>
+  </div>
+
+  <div class="detail-section update-section">
+    <h3>تعيين مهندس</h3>
+    <form [formGroup]="engineerAssignmentForm" (ngSubmit)="assignEngineer()" class="status-form">
+      <select formControlName="engineerId">
+        <option [ngValue]="null" disabled>اختر مهندساً...</option>
+        @for(engineer of engineers(); track engineer.id) {
+          <option [value]="engineer.id">{{ engineer.name }}</option>
+        }
+      </select>
+      <button type="submit" [disabled]="isAssigningEngineer() || engineerAssignmentForm.invalid">
+        @if(isAssigningEngineer()) { <span>جاري التعيين...</span> } @else { <span>تعيين</span> }
+      </button>
+    </form>
+  </div>
+</div>

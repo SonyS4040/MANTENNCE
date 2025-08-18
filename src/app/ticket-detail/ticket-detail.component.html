@@ -6,10 +6,10 @@
     }
   </div>
   
-  @if (isLoading) {
+  @if (isLoading()) {
     <p class="loading-message">جاري تحميل تفاصيل العطل...</p>
-  } @else if (error) {
-    <div class="error-message">{{ error }}</div>
+  } @else if (error()) {
+    <div class="error-message">{{ error() }}</div>
   } @else if (ticket()) {
     <header class="ticket-header">
       <h1>تفاصيل العطل رقم: {{ ticket()!.ticket_ref }}</h1>
@@ -20,162 +20,10 @@
     </header>
 
     <div class="ticket-content">
-      
-      <div class="actions-grid">
-        <div class="detail-section update-section">
-          <h3>تحديث حالة العطل</h3>
-          <form [formGroup]="statusUpdateForm" (ngSubmit)="updateTicketStatus()" class="status-form">
-            <select formControlName="newStatus">
-              @for(status of availableStatuses; track status) {
-                <option [value]="status">{{ status }}</option>
-              }
-            </select>
-            @if (statusUpdateForm.value.newStatus === 'تم الإصلاح') {
-              <div class="form-group">
-                <label for="repair_video">رفع فيديو بعد الإصلاح (إجباري)</label>
-                <input type="file" id="repair_video" (change)="onRepairVideoChange($event)" accept="video/*" required>
-              </div>
-            }
-            <button type="submit" [disabled]="isUpdatingStatus || statusUpdateForm.invalid || ticket()!.status === statusUpdateForm.value.newStatus">
-              @if(isUpdatingStatus) { <span>جاري التحديث...</span> } @else { <span>تحديث الحالة</span> }
-            </button>
-          </form>
-        </div>
-
-        <div class="detail-section update-section">
-          <h3>تعيين مهندس</h3>
-          <form [formGroup]="engineerAssignmentForm" (ngSubmit)="assignEngineer()" class="status-form">
-            <select formControlName="engineerId">
-              <option [ngValue]="null" disabled>اختر مهندساً...</option>
-              @for(engineer of engineers(); track engineer.id) {
-                <option [value]="engineer.id">{{ engineer.name }}</option>
-              }
-            </select>
-            <button type="submit" [disabled]="isAssigningEngineer || engineerAssignmentForm.invalid">
-              @if(isAssigningEngineer) { <span>جاري التعيين...</span> } @else { <span>تعيين</span> }
-            </button>
-          </form>
-        </div>
-      </div>
-
-      <div class="detail-section">
-        <h3>التكاليف والفوترة</h3>
-        <div class="costs-section">
-          @if (costItems().length > 0) {
-            <table class="costs-table">
-              <thead>
-                <tr>
-                  <th>الوصف</th>
-                  <th>الكمية</th>
-                  <th>سعر الوحدة</th>
-                  <th>الإجمالي</th>
-                  <th>إجراء</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (item of costItems(); track item.id) {
-                  <tr>
-                    <td>{{ item.description }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td>{{ item.unit_price | currency:'EGP ' }}</td>
-                    <td>{{ (item.quantity * item.unit_price) | currency:'EGP ' }}</td>
-                    <td>
-                      <button (click)="deleteCostItem(item.id)" class="delete-btn-small">حذف</button>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colspan="3">الإجمالي الكلي</td>
-                  <td colspan="2">{{ totalCost() | currency:'EGP ' }}</td>
-                </tr>
-              </tfoot>
-            </table>
-          } @else {
-            <p class="no-costs">لم يتم إضافة أي تكاليف بعد.</p>
-          }
-      
-          <form [formGroup]="costItemForm" (ngSubmit)="addCostItem()" class="add-cost-form" novalidate>
-            <h4>إضافة بند تكلفة جديد</h4>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="description">الوصف</label>
-                <input type="text" id="description" formControlName="description" placeholder="مثال: قطعة غيار X">
-              </div>
-              <div class="form-group">
-                <label for="quantity">الكمية</label>
-                <input type="number" id="quantity" formControlName="quantity">
-              </div>
-              <div class="form-group">
-                <label for="unit_price">سعر الوحدة</label>
-                <input type="number" id="unit_price" formControlName="unit_price">
-              </div>
-              <button type="submit" class="add-btn" [disabled]="isAddingCost || costItemForm.invalid">
-                @if(isAddingCost) { <span>جاري الإضافة...</span> } @else { <span>+ إضافة</span> }
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <div class="detail-section">
-        <h3>التقرير الفني</h3>
-        <form [formGroup]="reportForm" (ngSubmit)="saveReport()" class="report-form">
-          <div class="form-group">
-            <label for="technical_inspection_notes">ملاحظات الفحص الفني المبدئي</label>
-            <textarea id="technical_inspection_notes" formControlName="technical_inspection_notes" rows="4"></textarea>
-          </div>
-          <div class="form-group">
-            <label for="repair_notes">الإجراءات التي تمت وقطع الغيار المستخدمة</label>
-            <textarea id="repair_notes" formControlName="repair_notes" rows="4"></textarea>
-          </div>
-          <div class="form-group">
-            <label for="handover_notes">ملاحظات تسليم الجهاز للعميل</label>
-            <textarea id="handover_notes" formControlName="handover_notes" rows="4"></textarea>
-          </div>
-          <button type="submit" class="save-report-btn" [disabled]="isSavingReport || reportForm.pristine">
-            @if(isSavingReport) { <span>جاري الحفظ...</span> } @else { <span>حفظ بيانات التقرير</span> }
-          </button>
-        </form>
-      </div>
-
-      <div class="detail-section">
-        <h3>معلومات العميل والمهندس</h3>
-        <div class="info-grid">
-          <div class="info-item"><strong>اسم العميل:</strong><p>{{ ticket()!.customer_name }}</p></div>
-          <div class="info-item"><strong>رقم الهاتف:</strong><p>{{ ticket()!.customer_phone }}</p></div>
-          <div class="info-item"><strong>المهندس المسؤول:</strong><p>{{ ticket()!.engineers?.name || 'لم يتم التعيين بعد' }}</p></div>
-          <div class="info-item full-width"><strong>عنوان المنشأة:</strong><p>{{ ticket()!.customer_address }}</p></div>
-        </div>
-      </div>
-
-      <div class="detail-section">
-        <h3>معلومات الجهاز والعطل</h3>
-        <div class="info-grid">
-          <div class="info-item"><strong>نوع الجهاز:</strong><p>{{ ticket()!.device_type }}</p></div>
-          <div class="info-item"><strong>الرقم التسلسلي:</strong><p>{{ ticket()!.serial_number || 'غير متوفر' }}</p></div>
-          <div class="info-item full-width"><strong>وصف العطل:</strong><p class="description">{{ ticket()!.fault_description }}</p></div>
-          <div class="info-item"><strong>تاريخ الإنشاء:</strong><p>{{ ticket()!.created_at | date:'yyyy/MM/dd hh:mm a' }}</p></div>
-        </div>
-      </div>
-
-      @if (ticket()!.attachment_url) {
-        <div class="detail-section">
-          <h3>المرفقات</h3>
-          <a [href]="ticket()!.attachment_url" target="_blank" rel="noopener noreferrer" class="attachment-link">عرض المرفق</a>
-        </div>
-      }
-
-      @if (ticket()!.repair_video_url) {
-        <div class="detail-section">
-          <h3>فيديو بعد الإصلاح</h3>
-          <video controls width="100%">
-            <source [src]="ticket()!.repair_video_url" type="video/mp4">
-            متصفحك لا يدعم عرض الفيديو.
-          </video>
-        </div>
-      }
+      <app-ticket-actions [ticket]="ticket()!" (ticketUpdated)="handleTicketUpdate($event)"></app-ticket-actions>
+      <app-ticket-costs [ticketId]="ticket()!.id"></app-ticket-costs>
+      <app-ticket-report-form [ticket]="ticket()!" (ticketUpdated)="handleTicketUpdate($event)"></app-ticket-report-form>
+      <app-ticket-info [ticket]="ticket()!"></app-ticket-info>
     </div>
   }
 </div>
