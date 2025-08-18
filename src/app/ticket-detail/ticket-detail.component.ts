@@ -30,6 +30,7 @@ export interface TicketDetail extends Ticket {
   technical_inspection_notes: string | null;
   repair_notes: string | null;
   handover_notes: string | null;
+  repair_video_url: string | null;
 }
 
 @Component({
@@ -49,6 +50,7 @@ export class TicketDetailComponent implements OnInit {
   isAssigningEngineer = false;
   isSavingReport = false;
   isAddingCost = false;
+  selectedRepairVideo: File | null = null;
 
   statusUpdateForm: FormGroup;
   engineerAssignmentForm: FormGroup;
@@ -185,15 +187,68 @@ export class TicketDetailComponent implements OnInit {
     }
   }
 
+  onRepairVideoChange(event: any) {
+    if (event.target.files.length > 0) {
+      this.selectedRepairVideo = event.target.files[0];
+    } else {
+      this.selectedRepairVideo = null;
+    }
+  }
+
   async updateTicketStatus() {
     if (!this.ticket() || this.isUpdatingStatus) return;
-    this.isUpdatingStatus = true;
+    
     const newStatus = this.statusUpdateForm.value.newStatus;
+
+    if (newStatus === 'تم الإصلاح' && !this.selectedRepairVideo) {
+      alert('الرجاء رفع فيديو بعد الإصلاح لإتمام العملية.');
+      return;
+    }
+
+    this.isUpdatingStatus = true;
+    let repairVideoUrl: string | null = null;
+
     try {
-      const { error } = await supabase.from('tickets').update({ status: newStatus }).eq('id', this.ticket()!.id);
+      if (newStatus === 'تم الإصلاح' && this.selectedRepairVideo) {
+        const file = this.selectedRepairVideo;
+        const filePath = `public/repair-videos/${Date.now()}_${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from('ticket-attachments')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage.from('ticket-attachments').getPublicUrl(filePath);
+        repairVideoUrl = data.publicUrl;
+      }
+
+      const updateData: { status: string; repair_video_url?: string } = { status: newStatus };
+      if (repairVideoUrl) {
+        updateData.repair_video_url = repairVideoUrl;
+      }
+
+      const { error } = await supabase
+        .from('tickets')
+        .update(updateData)
+        .eq('id', this.ticket()!.id);
+
       if (error) throw error;
-      this.ticket.update(t => t ? { ...t, status: newStatus } : null);
+
+      this.ticket.update(t => {
+        if (!t) return null;
+        const updatedTicket: TicketDetail = { ...t, status: newStatus };
+        if (repairVideoUrl) {
+          updatedTicket.repair_video_url = repairVideoUrl;
+        }
+        return updatedTicket;
+      });
+      
+      this.selectedRepairVideo = null;
+      const videoInput = document.getElementById('repair_video') as HTMLInputElement;
+      if (videoInput) videoInput.value = '';
+
       alert('تم تحديث حالة العطل بنجاح!');
+
     } catch (err: any) {
       alert(`حدث خطأ أثناء تحديث الحالة: ${err.message}`);
     } finally {

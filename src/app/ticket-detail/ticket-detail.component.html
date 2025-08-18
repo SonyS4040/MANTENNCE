@@ -30,6 +30,12 @@
                 <option [value]="status">{{ status }}</option>
               }
             </select>
+            @if (statusUpdateForm.value.newStatus === 'تم الإصلاح') {
+              <div class="form-group">
+                <label for="repair_video">رفع فيديو بعد الإصلاح (إجباري)</label>
+                <input type="file" id="repair_video" (change)="onRepairVideoChange($event)" accept="video/*" required>
+              </div>
+            }
             <button type="submit" [disabled]="isUpdatingStatus || statusUpdateForm.invalid || ticket()!.status === statusUpdateForm.value.newStatus">
               @if(isUpdatingStatus) { <span>جاري التحديث...</span> } @else { <span>تحديث الحالة</span> }
             </button>
@@ -158,6 +164,16 @@
         <div class="detail-section">
           <h3>المرفقات</h3>
           <a [href]="ticket()!.attachment_url" target="_blank" rel="noopener noreferrer" class="attachment-link">عرض المرفق</a>
+        </div>
+      }
+
+      @if (ticket()!.repair_video_url) {
+        <div class="detail-section">
+          <h3>فيديو بعد الإصلاح</h3>
+          <video controls width="100%">
+            <source [src]="ticket()!.repair_video_url" type="video/mp4">
+            متصفحك لا يدعم عرض الفيديو.
+          </video>
         </div>
       }
     </div>

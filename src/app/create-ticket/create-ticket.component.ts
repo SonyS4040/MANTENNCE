@@ -23,15 +23,21 @@ export class CreateTicketComponent {
       deviceType: ['', Validators.required],
       serialNumber: [''],
       faultDescription: ['', Validators.required],
-      priority: ['عادي', Validators.required]
+      priority: ['عادي', Validators.required],
+      attachment: [null, Validators.required]
     });
   }
 
   onFileChange(event: any) {
     if (event.target.files.length > 0) {
-      this.selectedFile = event.target.files[0];
+      const file = event.target.files[0];
+      this.selectedFile = file;
+      this.ticketForm.patchValue({ attachment: file });
+      this.ticketForm.get('attachment')?.updateValueAndValidity();
     } else {
       this.selectedFile = null;
+      this.ticketForm.patchValue({ attachment: null });
+      this.ticketForm.get('attachment')?.updateValueAndValidity();
     }
   }
 

@@ -57,8 +57,11 @@
         </select>
       </div>
       <div class="form-group">
-        <label for="attachments">إرفاق صور أو فيديو (اختياري)</label>
-        <input type="file" id="attachments" (change)="onFileChange($event)">
+        <label for="attachments">إرفاق صور أو فيديو (إجباري)</label>
+        <input type="file" id="attachments" (change)="onFileChange($event)" accept="image/*,video/*">
+        @if (ticketForm.get('attachment')?.invalid && (ticketForm.get('attachment')?.touched || ticketForm.get('attachment')?.dirty)) {
+          <div class="error">إرفاق ملف إجباري.</div>
+        }
       </div>
     </fieldset>
 
