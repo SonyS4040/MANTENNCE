@@ -23,7 +23,7 @@
       <app-ticket-actions [ticket]="ticket()!" (ticketUpdated)="handleTicketUpdate($event)"></app-ticket-actions>
       <app-ticket-costs [ticketId]="ticket()!.id"></app-ticket-costs>
       <app-ticket-report-form [ticket]="ticket()!" (ticketUpdated)="handleTicketUpdate($event)"></app-ticket-report-form>
-      <app-ticket-info [ticket]="ticket()!"></app-ticket-info>
+      <app-ticket-info [ticket]="ticket()!" (ticketUpdated)="handleTicketUpdate($event)"></app-ticket-info>
     </div>
   }
 </div>
