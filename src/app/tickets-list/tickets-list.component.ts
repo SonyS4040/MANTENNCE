@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { supabase } from '../../integrations/supabase/client';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 export interface Ticket {
   id: string;
@@ -25,10 +25,9 @@ export class TicketsListComponent implements OnInit {
   isLoading = true;
   error: string | null = null;
 
+  private router = inject(Router);
+
   async ngOnInit() {
-    // This page requires authentication, but for now we'll fetch data
-    // without a logged-in user. This will fail until a user is logged in
-    // because of the RLS policy. This is the next step.
     await this.fetchTickets();
   }
 
@@ -42,7 +41,6 @@ export class TicketsListComponent implements OnInit {
         .order('created_at', { ascending: false });
 
       if (error) {
-        // This error is expected if no user is logged in.
         if (error.code === '42501') {
              this.error = 'الرجاء تسجيل الدخول لعرض قائمة الأعطال.';
         } else {
@@ -59,6 +57,37 @@ export class TicketsListComponent implements OnInit {
       console.error(err);
     } finally {
       this.isLoading = false;
+    }
+  }
+
+  navigateToDetail(ticketId: string) {
+    this.router.navigate(['/tickets', ticketId]);
+  }
+
+  async deleteTicket(ticketId: string, ticketRef: string, event: MouseEvent) {
+    event.stopPropagation(); // Prevent row click from navigating
+
+    if (!confirm(`هل أنت متأكد من رغبتك في حذف العطل رقم "${ticketRef}"؟ سيتم حذف جميع البيانات المتعلقة به نهائياً.`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('tickets')
+        .delete()
+        .eq('id', ticketId);
+
+      if (error) {
+        throw error;
+      }
+
+      // Update the UI instantly by removing the ticket from the local list
+      this.tickets = this.tickets.filter(ticket => ticket.id !== ticketId);
+      alert(`تم حذف العطل "${ticketRef}" بنجاح.`);
+
+    } catch (err: any) {
+      alert(`حدث خطأ أثناء حذف العطل: ${err.message}`);
+      console.error(err);
     }
   }
 }

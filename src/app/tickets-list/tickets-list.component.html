@@ -21,11 +21,12 @@
             <th>تاريخ الإنشاء</th>
             <th>الأولوية</th>
             <th>الحالة</th>
+            <th>الإجراءات</th>
           </tr>
         </thead>
         <tbody>
           @for (ticket of tickets; track ticket.id) {
-            <tr [routerLink]="['/tickets', ticket.id]" class="ticket-row">
+            <tr (click)="navigateToDetail(ticket.id)" class="ticket-row">
               <td>{{ ticket.ticket_ref }}</td>
               <td>{{ ticket.customer_name }}</td>
               <td>{{ ticket.device_type }}</td>
@@ -35,6 +36,9 @@
               </td>
               <td>
                 <span class="status" [ngClass]="'status-' + ticket.status">{{ ticket.status }}</span>
+              </td>
+              <td class="actions">
+                <button (click)="deleteTicket(ticket.id, ticket.ticket_ref, $event)" class="delete-btn">حذف</button>
               </td>
             </tr>
           }
