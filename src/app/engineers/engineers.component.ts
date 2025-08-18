@@ -1,13 +1,19 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, PercentPipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { supabase } from '../../integrations/supabase/client';
-import { Engineer } from '../ticket-detail/ticket-detail.component';
+
+// Define a more detailed Engineer interface for this component
+export interface Engineer {
+  id: string;
+  name: string;
+  commission_rate: number;
+}
 
 @Component({
   selector: 'app-engineers',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, PercentPipe],
   templateUrl: './engineers.component.html',
   styleUrl: './engineers.component.css'
 })
@@ -21,7 +27,8 @@ export class EngineersComponent implements OnInit {
 
   constructor(private fb: FormBuilder) {
     this.engineerForm = this.fb.group({
-      name: ['', Validators.required]
+      name: ['', Validators.required],
+      commission_rate: [0.10, [Validators.required, Validators.min(0), Validators.max(1)]]
     });
   }
 
@@ -35,7 +42,7 @@ export class EngineersComponent implements OnInit {
     try {
       const { data, error } = await supabase
         .from('engineers')
-        .select('id, name')
+        .select('id, name, commission_rate')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -65,9 +72,9 @@ export class EngineersComponent implements OnInit {
   }
 
   private async addEngineer() {
-    const { name } = this.engineerForm.value;
+    const { name, commission_rate } = this.engineerForm.value;
     try {
-      const { error } = await supabase.from('engineers').insert([{ name }]);
+      const { error } = await supabase.from('engineers').insert([{ name, commission_rate }]);
       if (error) throw error;
       alert('تمت إضافة المهندس بنجاح!');
       this.resetForm();
@@ -78,12 +85,12 @@ export class EngineersComponent implements OnInit {
   }
 
   private async updateEngineer() {
-    const { name } = this.engineerForm.value;
+    const { name, commission_rate } = this.engineerForm.value;
     const engineerId = this.editingEngineer()!.id;
     try {
-      const { error } = await supabase.from('engineers').update({ name }).eq('id', engineerId);
+      const { error } = await supabase.from('engineers').update({ name, commission_rate }).eq('id', engineerId);
       if (error) throw error;
-      alert('تم تعديل اسم المهندس بنجاح!');
+      alert('تم تعديل بيانات المهندس بنجاح!');
       this.resetForm();
       await this.fetchEngineers();
     } catch (err: any) {
@@ -93,12 +100,15 @@ export class EngineersComponent implements OnInit {
 
   startEdit(engineer: Engineer) {
     this.editingEngineer.set(engineer);
-    this.engineerForm.patchValue({ name: engineer.name });
+    this.engineerForm.patchValue({ 
+      name: engineer.name,
+      commission_rate: engineer.commission_rate 
+    });
   }
 
   resetForm() {
     this.editingEngineer.set(null);
-    this.engineerForm.reset();
+    this.engineerForm.reset({ name: '', commission_rate: 0.10 });
   }
 
   async deleteEngineer(id: string, name: string) {

@@ -32,30 +32,27 @@ export class AccountsComponent implements OnInit {
     this.isLoading = true;
     this.error = null;
     try {
-      // This is a placeholder for a configurable commission rate.
-      // In the future, this could be fetched from a settings table or from each engineer's profile.
-      const COMMISSION_RATE = 0.10; // 10%
-
       const { data, error } = await supabase
         .from('tickets')
-        .select('id, created_at, engineers(name), maintenance_costs(*)')
+        .select('id, created_at, engineers(name, commission_rate), maintenance_costs(*)')
         .eq('status', 'تم الإصلاح')
         .not('assigned_engineer_id', 'is', null);
 
       if (error) throw error;
 
-      const monthlyTotals = new Map<string, { totalCost: number; ticketCount: Set<string> }>();
+      const monthlyTotals = new Map<string, { totalCost: number; ticketCount: Set<string>; commissionRate: number }>();
 
       for (const ticket of data) {
-        if (ticket.engineers && ticket.maintenance_costs.length > 0) {
+        const engineer = ticket.engineers as any;
+        if (engineer && ticket.maintenance_costs.length > 0) {
           const ticketTotalCost = ticket.maintenance_costs.reduce((sum: number, item: any) => sum + (item.quantity * item.unit_price), 0);
           
           if (ticketTotalCost > 0) {
             const date = new Date(ticket.created_at);
             const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-            const engineerMonthKey = `${(ticket.engineers as any).name}::${monthKey}`;
+            const engineerMonthKey = `${engineer.name}::${monthKey}`;
 
-            const current = monthlyTotals.get(engineerMonthKey) || { totalCost: 0, ticketCount: new Set() };
+            const current = monthlyTotals.get(engineerMonthKey) || { totalCost: 0, ticketCount: new Set(), commissionRate: engineer.commission_rate };
             current.totalCost += ticketTotalCost;
             current.ticketCount.add(ticket.id);
             monthlyTotals.set(engineerMonthKey, current);
@@ -74,8 +71,8 @@ export class AccountsComponent implements OnInit {
           month: monthFormatted,
           totalCost: value.totalCost,
           ticketCount: value.ticketCount.size,
-          commissionRate: COMMISSION_RATE,
-          commissionAmount: value.totalCost * COMMISSION_RATE
+          commissionRate: value.commissionRate,
+          commissionAmount: value.totalCost * value.commissionRate
         });
       }
       
