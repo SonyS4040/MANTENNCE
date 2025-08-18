@@ -14,10 +14,6 @@ export class AuthService {
     supabase.auth.onAuthStateChange((event, session) => {
       this.session.set(session);
       this.user.set(session?.user ?? null);
-
-      if (event === 'SIGNED_IN') {
-        this.router.navigate(['/tickets']);
-      }
     });
   }
 

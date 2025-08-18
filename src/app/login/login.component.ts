@@ -39,7 +39,7 @@ export class LoginComponent {
       const { email, password } = this.loginForm.value;
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      // The auth service will handle navigation on successful sign-in
+      this.router.navigate(['/tickets']);
     } catch (error: any) {
       this.authError = error.message || 'An unexpected error occurred.';
     } finally {
