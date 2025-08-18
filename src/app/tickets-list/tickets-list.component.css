@@ -56,11 +56,9 @@ h2 {
 .priority-متوسط { background-color: #f0ad4e; }
 .priority-عادي { background-color: #5cb85c; }
 
-.status-مفتوح { background-color: #0275d8; }
-.status-قيد\ المعالجة { background-color: #5bc0de; }
-.status-تم\ الإصلاح { background-color: #5cb85c; }
-.status-لم\ يتم\ الإصلاح { background-color: #d9534f; }
-.status-معلق { background-color: #f0ad4e; }
+.status {
+  background-color: #5cb85c;
+}
 
 .error-message {
   text-align: center;
