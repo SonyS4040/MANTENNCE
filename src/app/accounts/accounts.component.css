@@ -1,5 +1,5 @@
 .accounts-container {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 2rem auto;
   padding: 2rem;
   background-color: #fff;
@@ -32,6 +32,7 @@ p {
 .accounts-table th, .accounts-table td {
   padding: 1rem;
   border-bottom: 1px solid #ddd;
+  white-space: nowrap;
 }
 
 .accounts-table thead th {

@@ -15,8 +15,10 @@
           <tr>
             <th>اسم المهندس</th>
             <th>الشهر</th>
-            <th>عدد الصيانات المكتملة</th>
+            <th>عدد الصيانات</th>
             <th>إجمالي قيمة الصيانات</th>
+            <th>نسبة العمولة</th>
+            <th>قيمة العمولة المستحقة</th>
           </tr>
         </thead>
         <tbody>
@@ -26,6 +28,8 @@
               <td>{{ report.month }}</td>
               <td>{{ report.ticketCount }}</td>
               <td>{{ report.totalCost | currency:'EGP ':'symbol':'1.2-2' }}</td>
+              <td>{{ report.commissionRate | percent:'1.0-0' }}</td>
+              <td>{{ report.commissionAmount | currency:'EGP ':'symbol':'1.2-2' }}</td>
             </tr>
           }
         </tbody>

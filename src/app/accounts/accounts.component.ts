@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule, CurrencyPipe, PercentPipe } from '@angular/common';
 
 import { supabase } from '../../integrations/supabase/client';
 
@@ -8,12 +8,14 @@ interface EngineerMonthlyTotal {
   month: string;
   totalCost: number;
   ticketCount: number;
+  commissionRate: number;
+  commissionAmount: number;
 }
 
 @Component({
   selector: 'app-accounts',
   standalone: true,
-  imports: [CommonModule, CurrencyPipe],
+  imports: [CommonModule, CurrencyPipe, PercentPipe],
   templateUrl: './accounts.component.html',
   styleUrl: './accounts.component.css'
 })
@@ -30,6 +32,10 @@ export class AccountsComponent implements OnInit {
     this.isLoading = true;
     this.error = null;
     try {
+      // This is a placeholder for a configurable commission rate.
+      // In the future, this could be fetched from a settings table or from each engineer's profile.
+      const COMMISSION_RATE = 0.10; // 10%
+
       const { data, error } = await supabase
         .from('tickets')
         .select('id, created_at, engineers(name), maintenance_costs(*)')
@@ -67,7 +73,9 @@ export class AccountsComponent implements OnInit {
           engineerName,
           month: monthFormatted,
           totalCost: value.totalCost,
-          ticketCount: value.ticketCount.size
+          ticketCount: value.ticketCount.size,
+          commissionRate: COMMISSION_RATE,
+          commissionAmount: value.totalCost * COMMISSION_RATE
         });
       }
       
