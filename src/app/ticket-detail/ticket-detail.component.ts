@@ -18,10 +18,10 @@ export interface TicketDetail extends Ticket {
   attachment_url: string | null;
   assigned_engineer_id: string | null;
   engineers: { name: string } | null;
-  // New report fields
   technical_inspection_notes: string | null;
   repair_notes: string | null;
   handover_notes: string | null;
+  maintenance_cost: number | null;
 }
 
 @Component({
@@ -39,10 +39,12 @@ export class TicketDetailComponent implements OnInit {
   isUpdatingStatus = false;
   isAssigningEngineer = false;
   isSavingReport = false;
+  isSavingCost = false;
 
   statusUpdateForm: FormGroup;
   engineerAssignmentForm: FormGroup;
   reportForm: FormGroup;
+  costForm: FormGroup;
   availableStatuses = ['مفتوح', 'قيد المعالجة', 'تم الإصلاح', 'لم يتم الإصلاح', 'معلق'];
 
   private route = inject(ActivatedRoute);
@@ -59,6 +61,9 @@ export class TicketDetailComponent implements OnInit {
       technical_inspection_notes: [''],
       repair_notes: [''],
       handover_notes: ['']
+    });
+    this.costForm = this.fb.group({
+      maintenance_cost: [0, [Validators.required, Validators.min(0)]]
     });
   }
 
@@ -95,13 +100,15 @@ export class TicketDetailComponent implements OnInit {
           repair_notes: ticketData.repair_notes,
           handover_notes: ticketData.handover_notes
         });
+        this.costForm.patchValue({
+          maintenance_cost: ticketData.maintenance_cost
+        });
       } else {
         this.error = 'لم يتم العثور على العطل المطلوب.';
       }
 
     } catch (err: any) {
       this.error = `حدث خطأ في جلب تفاصيل العطل: ${err.message}`;
-      console.error(err);
     } finally {
       this.isLoading = false;
     }
@@ -109,42 +116,24 @@ export class TicketDetailComponent implements OnInit {
 
   async fetchEngineers() {
     try {
-      const { data, error } = await supabase
-        .from('engineers')
-        .select('id, name')
-        .order('name');
-      
+      const { data, error } = await supabase.from('engineers').select('id, name').order('name');
       if (error) throw error;
       this.engineers.set(data || []);
     } catch (err: any) {
       console.error('Error fetching engineers:', err);
-      // Do not overwrite main error message
     }
   }
 
   async updateTicketStatus() {
     if (!this.ticket() || this.isUpdatingStatus) return;
-
     this.isUpdatingStatus = true;
     const newStatus = this.statusUpdateForm.value.newStatus;
-    const ticketId = this.ticket()!.id;
-
     try {
-      const { error } = await supabase
-        .from('tickets')
-        .update({ status: newStatus })
-        .eq('id', ticketId);
-
+      const { error } = await supabase.from('tickets').update({ status: newStatus }).eq('id', this.ticket()!.id);
       if (error) throw error;
-
-      this.ticket.update(currentTicket => 
-        currentTicket ? { ...currentTicket, status: newStatus } : null
-      );
-      
+      this.ticket.update(t => t ? { ...t, status: newStatus } : null);
       alert('تم تحديث حالة العطل بنجاح!');
-
     } catch (err: any) {
-      console.error('Error updating status:', err);
       alert(`حدث خطأ أثناء تحديث الحالة: ${err.message}`);
     } finally {
       this.isUpdatingStatus = false;
@@ -153,26 +142,14 @@ export class TicketDetailComponent implements OnInit {
 
   async assignEngineer() {
     if (!this.ticket() || this.engineerAssignmentForm.invalid || this.isAssigningEngineer) return;
-
     this.isAssigningEngineer = true;
     const engineerId = this.engineerAssignmentForm.value.engineerId;
-    const ticketId = this.ticket()!.id;
-
     try {
-      const { data, error } = await supabase
-        .from('tickets')
-        .update({ assigned_engineer_id: engineerId })
-        .eq('id', ticketId)
-        .select('*, engineers(name)')
-        .single();
-
+      const { data, error } = await supabase.from('tickets').update({ assigned_engineer_id: engineerId }).eq('id', this.ticket()!.id).select('*, engineers(name)').single();
       if (error) throw error;
-
       this.ticket.set(data as TicketDetail);
       alert('تم تعيين المهندس بنجاح!');
-
     } catch (err: any) {
-      console.error('Error assigning engineer:', err);
       alert(`حدث خطأ أثناء تعيين المهندس: ${err.message}`);
     } finally {
       this.isAssigningEngineer = false;
@@ -181,31 +158,35 @@ export class TicketDetailComponent implements OnInit {
 
   async saveReport() {
     if (!this.ticket() || this.reportForm.invalid || this.isSavingReport) return;
-
     this.isSavingReport = true;
     const reportData = this.reportForm.value;
-    const ticketId = this.ticket()!.id;
-
     try {
-      const { data, error } = await supabase
-        .from('tickets')
-        .update(reportData)
-        .eq('id', ticketId)
-        .select()
-        .single();
-
+      const { error } = await supabase.from('tickets').update(reportData).eq('id', this.ticket()!.id);
       if (error) throw error;
-
-      this.ticket.update(currentTicket => 
-        currentTicket ? { ...currentTicket, ...reportData } : null
-      );
+      this.ticket.update(t => t ? { ...t, ...reportData } : null);
+      this.reportForm.markAsPristine();
       alert('تم حفظ بيانات التقرير الفني بنجاح!');
-
     } catch (err: any) {
-      console.error('Error saving report:', err);
       alert(`حدث خطأ أثناء حفظ التقرير: ${err.message}`);
     } finally {
       this.isSavingReport = false;
+    }
+  }
+
+  async saveMaintenanceCost() {
+    if (!this.ticket() || this.costForm.invalid || this.isSavingCost) return;
+    this.isSavingCost = true;
+    const costData = this.costForm.value;
+    try {
+      const { error } = await supabase.from('tickets').update(costData).eq('id', this.ticket()!.id);
+      if (error) throw error;
+      this.ticket.update(t => t ? { ...t, ...costData } : null);
+      this.costForm.markAsPristine();
+      alert('تم حفظ تكلفة الصيانة بنجاح!');
+    } catch (err: any) {
+      alert(`حدث خطأ أثناء حفظ التكلفة: ${err.message}`);
+    } finally {
+      this.isSavingCost = false;
     }
   }
 }

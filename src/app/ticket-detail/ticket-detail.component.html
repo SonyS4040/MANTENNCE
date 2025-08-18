@@ -31,11 +31,7 @@
               }
             </select>
             <button type="submit" [disabled]="isUpdatingStatus || statusUpdateForm.invalid || ticket()!.status === statusUpdateForm.value.newStatus">
-              @if(isUpdatingStatus) {
-                <span>جاري التحديث...</span>
-              } @else {
-                <span>تحديث الحالة</span>
-              }
+              @if(isUpdatingStatus) { <span>جاري التحديث...</span> } @else { <span>تحديث الحالة</span> }
             </button>
           </form>
         </div>
@@ -50,14 +46,23 @@
               }
             </select>
             <button type="submit" [disabled]="isAssigningEngineer || engineerAssignmentForm.invalid">
-              @if(isAssigningEngineer) {
-                <span>جاري التعيين...</span>
-              } @else {
-                <span>تعيين</span>
-              }
+              @if(isAssigningEngineer) { <span>جاري التعيين...</span> } @else { <span>تعيين</span> }
             </button>
           </form>
         </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>التكلفة والفوترة</h3>
+        <form [formGroup]="costForm" (ngSubmit)="saveMaintenanceCost()" class="report-form">
+          <div class="form-group">
+            <label for="maintenance_cost">تكلفة الصيانة (بالجنيه المصري)</label>
+            <input type="number" id="maintenance_cost" formControlName="maintenance_cost" class="cost-input">
+          </div>
+          <button type="submit" class="save-report-btn" [disabled]="isSavingCost || costForm.pristine || costForm.invalid">
+            @if(isSavingCost) { <span>جاري الحفظ...</span> } @else { <span>حفظ التكلفة</span> }
+          </button>
+        </form>
       </div>
 
       <div class="detail-section">
@@ -76,11 +81,7 @@
             <textarea id="handover_notes" formControlName="handover_notes" rows="4"></textarea>
           </div>
           <button type="submit" class="save-report-btn" [disabled]="isSavingReport || reportForm.pristine">
-            @if(isSavingReport) {
-              <span>جاري الحفظ...</span>
-            } @else {
-              <span>حفظ بيانات التقرير</span>
-            }
+            @if(isSavingReport) { <span>جاري الحفظ...</span> } @else { <span>حفظ بيانات التقرير</span> }
           </button>
         </form>
       </div>
