@@ -32,25 +32,28 @@ export class AccountsComponent implements OnInit {
     try {
       const { data, error } = await supabase
         .from('tickets')
-        .select('created_at, maintenance_cost, engineers(name)')
+        .select('id, created_at, engineers(name), maintenance_costs(*)')
         .eq('status', 'تم الإصلاح')
-        .gt('maintenance_cost', 0)
         .not('assigned_engineer_id', 'is', null);
 
       if (error) throw error;
 
-      const monthlyTotals = new Map<string, { totalCost: number; ticketCount: number }>();
+      const monthlyTotals = new Map<string, { totalCost: number; ticketCount: Set<string> }>();
 
       for (const ticket of data) {
-        if (ticket.engineers) {
-          const date = new Date(ticket.created_at);
-          const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-          const engineerMonthKey = `${(ticket.engineers as any).name}::${monthKey}`;
+        if (ticket.engineers && ticket.maintenance_costs.length > 0) {
+          const ticketTotalCost = ticket.maintenance_costs.reduce((sum: number, item: any) => sum + (item.quantity * item.unit_price), 0);
+          
+          if (ticketTotalCost > 0) {
+            const date = new Date(ticket.created_at);
+            const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+            const engineerMonthKey = `${(ticket.engineers as any).name}::${monthKey}`;
 
-          const current = monthlyTotals.get(engineerMonthKey) || { totalCost: 0, ticketCount: 0 };
-          current.totalCost += ticket.maintenance_cost || 0;
-          current.ticketCount += 1;
-          monthlyTotals.set(engineerMonthKey, current);
+            const current = monthlyTotals.get(engineerMonthKey) || { totalCost: 0, ticketCount: new Set() };
+            current.totalCost += ticketTotalCost;
+            current.ticketCount.add(ticket.id);
+            monthlyTotals.set(engineerMonthKey, current);
+          }
         }
       }
 
@@ -64,11 +67,10 @@ export class AccountsComponent implements OnInit {
           engineerName,
           month: monthFormatted,
           totalCost: value.totalCost,
-          ticketCount: value.ticketCount
+          ticketCount: value.ticketCount.size
         });
       }
       
-      // Sort by month (desc) then by engineer name
       formattedReports.sort((a, b) => {
         const monthA = a.month;
         const monthB = b.month;

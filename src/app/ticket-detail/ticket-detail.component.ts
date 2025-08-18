@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { supabase } from '../../integrations/supabase/client';
@@ -8,6 +8,15 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 export interface Engineer {
   id: string;
   name: string;
+}
+
+export interface MaintenanceCost {
+  id: string;
+  ticket_id: string;
+  description: string;
+  quantity: number;
+  unit_price: number;
+  created_at: string;
 }
 
 export interface TicketDetail extends Ticket {
@@ -21,7 +30,6 @@ export interface TicketDetail extends Ticket {
   technical_inspection_notes: string | null;
   repair_notes: string | null;
   handover_notes: string | null;
-  maintenance_cost: number | null;
 }
 
 @Component({
@@ -34,18 +42,23 @@ export interface TicketDetail extends Ticket {
 export class TicketDetailComponent implements OnInit {
   ticket = signal<TicketDetail | null>(null);
   engineers = signal<Engineer[]>([]);
+  costItems = signal<MaintenanceCost[]>([]);
   isLoading = true;
   error: string | null = null;
   isUpdatingStatus = false;
   isAssigningEngineer = false;
   isSavingReport = false;
-  isSavingCost = false;
+  isAddingCost = false;
 
   statusUpdateForm: FormGroup;
   engineerAssignmentForm: FormGroup;
   reportForm: FormGroup;
-  costForm: FormGroup;
+  costItemForm: FormGroup;
   availableStatuses = ['مفتوح', 'قيد المعالجة', 'تم الإصلاح', 'لم يتم الإصلاح', 'معلق'];
+
+  totalCost = computed(() => 
+    this.costItems().reduce((sum, item) => sum + (item.quantity * item.unit_price), 0)
+  );
 
   private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
@@ -62,8 +75,10 @@ export class TicketDetailComponent implements OnInit {
       repair_notes: [''],
       handover_notes: ['']
     });
-    this.costForm = this.fb.group({
-      maintenance_cost: [0, [Validators.required, Validators.min(0)]]
+    this.costItemForm = this.fb.group({
+      description: ['', Validators.required],
+      quantity: [1, [Validators.required, Validators.min(0.01)]],
+      unit_price: [0, [Validators.required, Validators.min(0)]]
     });
   }
 
@@ -72,6 +87,7 @@ export class TicketDetailComponent implements OnInit {
     if (ticketId) {
       this.fetchTicketDetails(ticketId);
       this.fetchEngineers();
+      this.fetchCostItems(ticketId);
     } else {
       this.error = 'لم يتم العثور على معرف العطل.';
       this.isLoading = false;
@@ -100,9 +116,6 @@ export class TicketDetailComponent implements OnInit {
           repair_notes: ticketData.repair_notes,
           handover_notes: ticketData.handover_notes
         });
-        this.costForm.patchValue({
-          maintenance_cost: ticketData.maintenance_cost
-        });
       } else {
         this.error = 'لم يتم العثور على العطل المطلوب.';
       }
@@ -121,6 +134,54 @@ export class TicketDetailComponent implements OnInit {
       this.engineers.set(data || []);
     } catch (err: any) {
       console.error('Error fetching engineers:', err);
+    }
+  }
+
+  async fetchCostItems(ticketId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('maintenance_costs')
+        .select('*')
+        .eq('ticket_id', ticketId)
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+      this.costItems.set(data || []);
+    } catch (err: any) {
+      console.error('Error fetching cost items:', err);
+      alert(`حدث خطأ في جلب بنود التكلفة: ${err.message}`);
+    }
+  }
+
+  async addCostItem() {
+    if (!this.ticket() || this.costItemForm.invalid) {
+      this.costItemForm.markAllAsTouched();
+      return;
+    }
+    this.isAddingCost = true;
+    const costData = {
+      ...this.costItemForm.value,
+      ticket_id: this.ticket()!.id
+    };
+    try {
+      const { error } = await supabase.from('maintenance_costs').insert([costData]);
+      if (error) throw error;
+      this.costItemForm.reset({ quantity: 1, unit_price: 0, description: '' });
+      await this.fetchCostItems(this.ticket()!.id);
+    } catch (err: any) {
+      alert(`حدث خطأ أثناء إضافة بند التكلفة: ${err.message}`);
+    } finally {
+      this.isAddingCost = false;
+    }
+  }
+
+  async deleteCostItem(costId: string) {
+    if (!confirm('هل أنت متأكد من رغبتك في حذف هذا البند؟')) return;
+    try {
+      const { error } = await supabase.from('maintenance_costs').delete().eq('id', costId);
+      if (error) throw error;
+      await this.fetchCostItems(this.ticket()!.id);
+    } catch (err: any) {
+      alert(`حدث خطأ أثناء حذف بند التكلفة: ${err.message}`);
     }
   }
 
@@ -170,23 +231,6 @@ export class TicketDetailComponent implements OnInit {
       alert(`حدث خطأ أثناء حفظ التقرير: ${err.message}`);
     } finally {
       this.isSavingReport = false;
-    }
-  }
-
-  async saveMaintenanceCost() {
-    if (!this.ticket() || this.costForm.invalid || this.isSavingCost) return;
-    this.isSavingCost = true;
-    const costData = this.costForm.value;
-    try {
-      const { error } = await supabase.from('tickets').update(costData).eq('id', this.ticket()!.id);
-      if (error) throw error;
-      this.ticket.update(t => t ? { ...t, ...costData } : null);
-      this.costForm.markAsPristine();
-      alert('تم حفظ تكلفة الصيانة بنجاح!');
-    } catch (err: any) {
-      alert(`حدث خطأ أثناء حفظ التكلفة: ${err.message}`);
-    } finally {
-      this.isSavingCost = false;
     }
   }
 }
