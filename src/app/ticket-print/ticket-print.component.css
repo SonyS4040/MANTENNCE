@@ -118,6 +118,36 @@ p.notes {
   white-space: pre-wrap;
 }
 
+.costs-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  text-align: right;
+  font-size: 0.9rem;
+}
+
+.costs-table th, .costs-table td {
+  padding: 0.6rem;
+  border: 1px solid #ddd;
+}
+
+.costs-table thead th {
+  background-color: #eef7f7;
+  color: #005f73;
+  font-weight: 600;
+}
+
+.costs-table tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.costs-table tfoot td {
+  font-weight: bold;
+  font-size: 1rem;
+  color: #005f73;
+  background-color: #eef7f7;
+}
+
 .report-footer {
   margin-top: 3rem;
   padding-top: 1.5rem;

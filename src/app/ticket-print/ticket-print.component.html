@@ -65,6 +65,40 @@
         <p class="notes">{{ ticket()!.handover_notes || 'لا توجد ملاحظات.' }}</p>
       </section>
 
+      <section class="details-section">
+        <h3>5. تفاصيل التكاليف</h3>
+        @if (ticket()!.maintenance_costs && ticket()!.maintenance_costs.length > 0) {
+          <table class="costs-table">
+            <thead>
+              <tr>
+                <th>الوصف</th>
+                <th>الكمية</th>
+                <th>سعر الوحدة</th>
+                <th>الإجمالي</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of ticket()!.maintenance_costs; track item.id) {
+                <tr>
+                  <td>{{ item.description }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>{{ item.unit_price | currency:'EGP ' }}</td>
+                  <td>{{ (item.quantity * item.unit_price) | currency:'EGP ' }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3">الإجمالي الكلي</td>
+                <td>{{ totalCost() | currency:'EGP ' }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        } @else {
+          <p class="notes">لا توجد تكاليف مسجلة لهذا العطل.</p>
+        }
+      </section>
+
       <footer class="report-footer">
         <div class="signature-box">
           <p><strong>توقيع الفني المسؤول</strong></p>

@@ -45,7 +45,13 @@ export class AccountsComponent implements OnInit {
       for (const ticket of data) {
         const engineer = ticket.engineers as any;
         if (engineer && ticket.maintenance_costs.length > 0) {
-          const ticketTotalCost = ticket.maintenance_costs.reduce((sum: number, item: any) => sum + (item.quantity * item.unit_price), 0);
+          // Filter for commissionable costs only ("الزياره" and "اتعاب الصيانه")
+          const commissionableCosts = ticket.maintenance_costs.filter((item: any) => 
+            item.description === 'الزياره' || item.description === 'اتعاب الصيانه'
+          );
+
+          // Calculate total based on filtered costs
+          const ticketTotalCost = commissionableCosts.reduce((sum: number, item: any) => sum + (item.quantity * item.unit_price), 0);
           
           if (ticketTotalCost > 0) {
             const date = new Date(ticket.created_at);
