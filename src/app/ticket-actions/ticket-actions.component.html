@@ -29,37 +29,32 @@
   </div>
 </div>
 
-<!-- New WhatsApp Section -->
-<div class="detail-section update-section whatsapp-section">
-  <h3>إرسال فيديوهات واتساب للعميل</h3>
-  <div class="whatsapp-actions">
+<!-- New Video Upload Section -->
+<div class="detail-section update-section video-upload-section">
+  <h3>رفع فيديوهات الصيانة</h3>
+  <p class="instructions">لرفع فيديو من واتساب، قم أولاً بحفظه على جهازك ثم اختره من هنا.</p>
+  <div class="video-actions">
     <!-- Before Repair Video -->
-    <div class="whatsapp-action-item">
+    <div class="video-action-item">
       <h4>فيديو قبل الإصلاح</h4>
-      @if (ticket.before_repair_video_url) {
-        <p class="video-status success">تم رفع الفيديو بنجاح.</p>
-      }
       <div class="form-group">
-        <label for="before_repair_video">اختر فيديو</label>
+        <label for="before_repair_video">اختر ملف الفيديو</label>
         <input type="file" id="before_repair_video" (change)="onVideoChange($event, 'before')" accept="video/*">
       </div>
-      <button (click)="uploadAndSendVideo('before')" [disabled]="!selectedVideos['before'] || isSendingVideo['before']">
-        @if(isSendingVideo['before']) { <span>جاري الرفع والإرسال...</span> } @else { <span>رفع وإرسال</span> }
+      <button (click)="uploadVideo('before')" [disabled]="!selectedVideos['before'] || isUploadingVideo['before']">
+        @if(isUploadingVideo['before']) { <span>جاري الرفع...</span> } @else { <span>رفع الفيديو</span> }
       </button>
     </div>
 
     <!-- After Repair Video -->
-    <div class="whatsapp-action-item">
+    <div class="video-action-item">
       <h4>فيديو بعد الإصلاح</h4>
-      @if (ticket.repair_video_url) {
-        <p class="video-status success">تم رفع الفيديو بنجاح.</p>
-      }
       <div class="form-group">
-        <label for="after_repair_video">اختر فيديو</label>
+        <label for="after_repair_video">اختر ملف الفيديو</label>
         <input type="file" id="after_repair_video" (change)="onVideoChange($event, 'after')" accept="video/*">
       </div>
-      <button (click)="uploadAndSendVideo('after')" [disabled]="!selectedVideos['after'] || isSendingVideo['after']">
-        @if(isSendingVideo['after']) { <span>جاري الرفع والإرسال...</span> } @else { <span>رفع وإرسال</span> }
+      <button (click)="uploadVideo('after')" [disabled]="!selectedVideos['after'] || isUploadingVideo['after']">
+        @if(isUploadingVideo['after']) { <span>جاري الرفع...</span> } @else { <span>رفع الفيديو</span> }
       </button>
     </div>
   </div>

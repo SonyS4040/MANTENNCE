@@ -33,18 +33,18 @@
   height: 100%;
 }
 
-.status-form .form-group {
+.status-form .form-group, .video-action-item .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.status-form label {
+.status-form label, .video-action-item label {
   font-weight: 600;
   font-size: 0.9rem;
 }
 
-.status-form input[type="file"] {
+.status-form input[type="file"], .video-action-item input[type="file"] {
   font-family: 'Cairo', sans-serif;
 }
 
@@ -80,18 +80,28 @@
   color: #666;
 }
 
-/* New WhatsApp Section Styles */
-.whatsapp-section {
+/* New Video Upload Section Styles */
+.video-upload-section {
   grid-column: 1 / -1; /* Make it full width */
 }
 
-.whatsapp-actions {
+.video-upload-section .instructions {
+  margin-top: -0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem;
+  background-color: #fff;
+  border-right: 4px solid #0a9396;
+  border-radius: 4px;
+  color: #333;
+}
+
+.video-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
 }
 
-.whatsapp-action-item {
+.video-action-item {
   background-color: #fff;
   padding: 1rem;
   border-radius: 4px;
@@ -101,18 +111,12 @@
   gap: 1rem;
 }
 
-.whatsapp-action-item h4 {
+.video-action-item h4 {
   margin: 0;
   color: #005f73;
 }
 
-.video-status.success {
-  color: #28a745;
-  font-weight: bold;
-  font-size: 0.9rem;
-}
-
-.whatsapp-action-item button {
+.video-action-item button {
   padding: 0.7rem 1.2rem;
   background-color: #28a745;
   color: white;
@@ -123,17 +127,17 @@
   transition: background-color 0.3s;
 }
 
-.whatsapp-action-item button:hover {
+.video-action-item button:hover {
   background-color: #218838;
 }
 
-.whatsapp-action-item button:disabled {
+.video-action-item button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }
 
 @media (max-width: 768px) {
-  .whatsapp-actions {
+  .video-actions {
     grid-template-columns: 1fr;
   }
 }

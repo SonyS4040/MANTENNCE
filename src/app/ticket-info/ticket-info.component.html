@@ -75,6 +75,16 @@
   </div>
 }
 
+@if (ticket.before_repair_video_url) {
+  <div class="detail-section">
+    <h3>فيديو قبل الإصلاح</h3>
+    <video controls width="100%">
+      <source [src]="ticket.before_repair_video_url" type="video/mp4">
+      متصفحك لا يدعم عرض الفيديو.
+    </video>
+  </div>
+}
+
 @if (ticket.repair_video_url) {
   <div class="detail-section">
     <h3>فيديو بعد الإصلاح</h3>

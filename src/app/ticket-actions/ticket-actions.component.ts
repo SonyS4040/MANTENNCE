@@ -27,7 +27,7 @@ export class TicketActionsComponent implements OnInit {
   isAssigningEngineer = signal(false);
   
   selectedVideos: { [key in VideoType]?: File } = {};
-  isSendingVideo: { [key in VideoType]?: boolean } = { before: false, after: false };
+  isUploadingVideo: { [key in VideoType]?: boolean } = { before: false, after: false };
 
   statusUpdateForm: FormGroup;
   engineerAssignmentForm: FormGroup;
@@ -68,21 +68,21 @@ export class TicketActionsComponent implements OnInit {
     }
   }
 
-  async uploadAndSendVideo(type: VideoType) {
+  async uploadVideo(type: VideoType) {
     const file = this.selectedVideos[type];
     if (!file) {
       alert('الرجاء اختيار ملف فيديو أولاً.');
       return;
     }
 
-    this.isSendingVideo[type] = true;
+    this.isUploadingVideo[type] = true;
     
     try {
       // 1. Upload video to Supabase Storage
-      const filePath = `public/repair-videos/${Date.now()}_${file.name}`;
+      const filePath = `public/repair-videos/${this.ticket.id}_${type}_${file.name}`;
       const { error: uploadError } = await supabase.storage
         .from('ticket-attachments')
-        .upload(filePath, file);
+        .upload(filePath, file, { upsert: true }); // Use upsert to overwrite if needed
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage.from('ticket-attachments').getPublicUrl(filePath);
@@ -100,24 +100,17 @@ export class TicketActionsComponent implements OnInit {
       if (updateError) throw updateError;
       this.ticketUpdated.emit(updatedTicket as TicketDetail);
       
-      // 3. Invoke the Edge Function to send WhatsApp message
-      const { error: functionError } = await supabase.functions.invoke('send-whatsapp-video', {
-        body: { ticketId: this.ticket.id, videoType: type },
-      });
-
-      if (functionError) throw new Error(`Function error: ${functionError.message}`);
-
-      alert(`تم رفع الفيديو وإرساله إلى العميل بنجاح!`);
+      alert(`تم رفع الفيديو بنجاح!`);
       this.selectedVideos[type] = undefined;
       const inputId = type === 'before' ? 'before_repair_video' : 'after_repair_video';
       const fileInput = document.getElementById(inputId) as HTMLInputElement;
       if (fileInput) fileInput.value = '';
 
     } catch (err: any) {
-      console.error(`Error during ${type} video process:`, err);
-      alert(`حدث خطأ: ${err.message}`);
+      console.error(`Error during ${type} video upload:`, err);
+      alert(`حدث خطأ أثناء رفع الفيديو: ${err.message}`);
     } finally {
-      this.isSendingVideo[type] = false;
+      this.isUploadingVideo[type] = false;
     }
   }
 
