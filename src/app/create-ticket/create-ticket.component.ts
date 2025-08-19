@@ -12,6 +12,7 @@ import { supabase } from '../../integrations/supabase/client';
 })
 export class CreateTicketComponent {
   ticketForm: FormGroup;
+  selectedFile: File | null = null;
   isSubmitting = false;
 
   constructor(private fb: FormBuilder) {
@@ -22,8 +23,22 @@ export class CreateTicketComponent {
       deviceType: ['', Validators.required],
       serialNumber: [''],
       faultDescription: ['', Validators.required],
-      priority: ['عادي', Validators.required]
+      priority: ['عادي', Validators.required],
+      attachment: [null, Validators.required]
     });
+  }
+
+  onFileChange(event: any) {
+    if (event.target.files.length > 0) {
+      const file = event.target.files[0];
+      this.selectedFile = file;
+      this.ticketForm.patchValue({ attachment: file });
+      this.ticketForm.get('attachment')?.updateValueAndValidity();
+    } else {
+      this.selectedFile = null;
+      this.ticketForm.patchValue({ attachment: null });
+      this.ticketForm.get('attachment')?.updateValueAndValidity();
+    }
   }
 
   async onSubmit() {
@@ -33,9 +48,26 @@ export class CreateTicketComponent {
     }
 
     this.isSubmitting = true;
+    let attachmentUrl = null;
 
     try {
-      // Prepare data for insertion with correct snake_case keys
+      // 1. Handle file upload if a file is selected
+      if (this.selectedFile) {
+        const file = this.selectedFile;
+        const filePath = `public/${Date.now()}_${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from('ticket-attachments')
+          .upload(filePath, file);
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const { data } = supabase.storage.from('ticket-attachments').getPublicUrl(filePath);
+        attachmentUrl = data.publicUrl;
+      }
+
+      // 2. Prepare data for insertion with correct snake_case keys
       const formValue = this.ticketForm.value;
       const ticketData = {
         customer_name: formValue.customerName,
@@ -45,10 +77,10 @@ export class CreateTicketComponent {
         serial_number: formValue.serialNumber,
         fault_description: formValue.faultDescription,
         priority: formValue.priority,
-        attachment_url: null // No longer uploading attachments here
+        attachment_url: attachmentUrl
       };
 
-      // Insert data into the 'tickets' table
+      // 3. Insert data into the 'tickets' table
       const { error: insertError } = await supabase.from('tickets').insert([ticketData]);
 
       if (insertError) {
@@ -57,6 +89,11 @@ export class CreateTicketComponent {
 
       alert('تم إرسال طلب الصيانة بنجاح!');
       this.ticketForm.reset({ priority: 'عادي' });
+      this.selectedFile = null;
+      // Also reset the file input visually if possible
+      const fileInput = document.getElementById('attachments') as HTMLInputElement;
+      if(fileInput) fileInput.value = '';
+
 
     } catch (error: any) {
       console.error('Error submitting ticket:', error);
