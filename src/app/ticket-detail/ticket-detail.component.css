@@ -90,10 +90,8 @@
 .priority-متوسط { background-color: #f0ad4e; }
 .priority-عادي { background-color: #5cb85c; }
 
-.status-مفتوح,
-.status-قيد\ المعالجة,
-.status-تم\ الإصلاح,
-.status-لم\ يتم\ الإصلاح,
-.status-معلق { 
-  background-color: #5cb85c; 
-}
+.status-مفتوح { background-color: #f0ad4e; } /* Orange */
+.status-قيد\ المعالجة { background-color: #337ab7; } /* Blue */
+.status-تم\ الإصلاح { background-color: #5cb85c; } /* Green */
+.status-لم\ يتم\ الإصلاح { background-color: #d9534f; } /* Red */
+.status-معلق { background-color: #777777; } /* Gray */
