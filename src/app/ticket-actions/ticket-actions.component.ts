@@ -9,6 +9,8 @@ export interface Engineer {
   name: string;
 }
 
+type VideoType = 'before' | 'after';
+
 @Component({
   selector: 'app-ticket-actions',
   standalone: true,
@@ -23,7 +25,9 @@ export class TicketActionsComponent implements OnInit {
   engineers = signal<Engineer[]>([]);
   isUpdatingStatus = signal(false);
   isAssigningEngineer = signal(false);
-  selectedRepairVideo: File | null = null;
+  
+  selectedVideos: { [key in VideoType]?: File } = {};
+  isSendingVideo: { [key in VideoType]?: boolean } = { before: false, after: false };
 
   statusUpdateForm: FormGroup;
   engineerAssignmentForm: FormGroup;
@@ -56,11 +60,64 @@ export class TicketActionsComponent implements OnInit {
     }
   }
 
-  onRepairVideoChange(event: any) {
+  onVideoChange(event: any, type: VideoType) {
     if (event.target.files.length > 0) {
-      this.selectedRepairVideo = event.target.files[0];
+      this.selectedVideos[type] = event.target.files[0];
     } else {
-      this.selectedRepairVideo = null;
+      this.selectedVideos[type] = undefined;
+    }
+  }
+
+  async uploadAndSendVideo(type: VideoType) {
+    const file = this.selectedVideos[type];
+    if (!file) {
+      alert('الرجاء اختيار ملف فيديو أولاً.');
+      return;
+    }
+
+    this.isSendingVideo[type] = true;
+    
+    try {
+      // 1. Upload video to Supabase Storage
+      const filePath = `public/repair-videos/${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('ticket-attachments')
+        .upload(filePath, file);
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from('ticket-attachments').getPublicUrl(filePath);
+      const videoUrl = urlData.publicUrl;
+
+      // 2. Update ticket record with the new video URL
+      const columnToUpdate = type === 'before' ? 'before_repair_video_url' : 'repair_video_url';
+      const { data: updatedTicket, error: updateError } = await supabase
+        .from('tickets')
+        .update({ [columnToUpdate]: videoUrl })
+        .eq('id', this.ticket.id)
+        .select('*, engineers(name)')
+        .single();
+      
+      if (updateError) throw updateError;
+      this.ticketUpdated.emit(updatedTicket as TicketDetail);
+      
+      // 3. Invoke the Edge Function to send WhatsApp message
+      const { error: functionError } = await supabase.functions.invoke('send-whatsapp-video', {
+        body: { ticketId: this.ticket.id, videoType: type },
+      });
+
+      if (functionError) throw new Error(`Function error: ${functionError.message}`);
+
+      alert(`تم رفع الفيديو وإرساله إلى العميل بنجاح!`);
+      this.selectedVideos[type] = undefined;
+      const inputId = type === 'before' ? 'before_repair_video' : 'after_repair_video';
+      const fileInput = document.getElementById(inputId) as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+
+    } catch (err: any) {
+      console.error(`Error during ${type} video process:`, err);
+      alert(`حدث خطأ: ${err.message}`);
+    } finally {
+      this.isSendingVideo[type] = false;
     }
   }
 
@@ -68,37 +125,12 @@ export class TicketActionsComponent implements OnInit {
     if (this.isUpdatingStatus()) return;
     
     const newStatus = this.statusUpdateForm.value.newStatus;
-
-    if (newStatus === 'تم الإصلاح' && !this.selectedRepairVideo) {
-      alert('الرجاء رفع فيديو بعد الإصلاح لإتمام العملية.');
-      return;
-    }
-
     this.isUpdatingStatus.set(true);
-    let repairVideoUrl: string | null = null;
 
     try {
-      if (newStatus === 'تم الإصلاح' && this.selectedRepairVideo) {
-        const file = this.selectedRepairVideo;
-        const filePath = `public/repair-videos/${Date.now()}_${file.name}`;
-        const { error: uploadError } = await supabase.storage
-          .from('ticket-attachments')
-          .upload(filePath, file);
-
-        if (uploadError) throw uploadError;
-
-        const { data } = supabase.storage.from('ticket-attachments').getPublicUrl(filePath);
-        repairVideoUrl = data.publicUrl;
-      }
-
-      const updateData: { status: string; repair_video_url?: string } = { status: newStatus };
-      if (repairVideoUrl) {
-        updateData.repair_video_url = repairVideoUrl;
-      }
-
       const { data, error } = await supabase
         .from('tickets')
-        .update(updateData)
+        .update({ status: newStatus })
         .eq('id', this.ticket.id)
         .select('*, engineers(name)')
         .single();
@@ -106,10 +138,6 @@ export class TicketActionsComponent implements OnInit {
       if (error) throw error;
 
       this.ticketUpdated.emit(data as TicketDetail);
-      this.selectedRepairVideo = null;
-      const videoInput = document.getElementById('repair_video') as HTMLInputElement;
-      if (videoInput) videoInput.value = '';
-
       alert('تم تحديث حالة العطل بنجاح!');
 
     } catch (err: any) {
