@@ -57,7 +57,9 @@
 }
 
 .detail-section video {
-  max-width: 100%;
+  max-width: 400px; /* Set a max-width to control size */
+  width: 100%; /* Ensure it's responsive within its container */
+  height: auto; /* Maintain aspect ratio */
   border-radius: 5px;
   background-color: #000;
 }
