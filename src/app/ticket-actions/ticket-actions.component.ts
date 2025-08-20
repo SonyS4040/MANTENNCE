@@ -1,0 +1,203 @@
+import { Component, Input, OnInit, Output, EventEmitter, signal, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { supabase } from '../../integrations/supabase/client';
+import { TicketDetail } from '../models/ticket.model';
+
+export interface Engineer {
+  id: string;
+  name: string;
+}
+
+type VideoType = 'before' | 'after';
+
+@Component({
+  selector: 'app-ticket-actions',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: './ticket-actions.component.html',
+  styleUrl: './ticket-actions.component.css'
+})
+export class TicketActionsComponent implements OnInit {
+  @Input({ required: true }) ticket!: TicketDetail;
+  @Output() ticketUpdated = new EventEmitter<TicketDetail>();
+
+  engineers = signal<Engineer[]>([]);
+  isUpdatingStatus = signal(false);
+  isAssigningEngineer = signal(false);
+  
+  selectedVideos: { [key in VideoType]?: File } = {};
+  isUploadingVideo: { [key in VideoType]?: boolean } = { before: false, after: false };
+  isDeletingVideo: { [key in VideoType]?: boolean } = { before: false, after: false };
+
+  statusUpdateForm: FormGroup;
+  engineerAssignmentForm: FormGroup;
+  availableStatuses = ['مفتوح', 'قيد المعالجة', 'تم الإصلاح', 'لم يتم الإصلاح', 'معلق'];
+
+  private fb = inject(FormBuilder);
+
+  constructor() {
+    this.statusUpdateForm = this.fb.group({
+      newStatus: ['']
+    });
+    this.engineerAssignmentForm = this.fb.group({
+      engineerId: [null, Validators.required]
+    });
+  }
+
+  ngOnInit(): void {
+    this.fetchEngineers();
+    this.statusUpdateForm.patchValue({ newStatus: this.ticket.status });
+    this.engineerAssignmentForm.patchValue({ engineerId: this.ticket.assigned_engineer_id });
+  }
+
+  async fetchEngineers() {
+    try {
+      const { data, error } = await supabase.from('engineers').select('id, name').order('name');
+      if (error) throw error;
+      this.engineers.set(data || []);
+    } catch (err: any) {
+      console.error('Error fetching engineers:', err);
+    }
+  }
+
+  onVideoChange(event: any, type: VideoType) {
+    if (event.target.files.length > 0) {
+      this.selectedVideos[type] = event.target.files[0];
+    } else {
+      this.selectedVideos[type] = undefined;
+    }
+  }
+
+  async uploadVideo(type: VideoType) {
+    const file = this.selectedVideos[type];
+    if (!file) {
+      alert('الرجاء اختيار ملف فيديو أولاً.');
+      return;
+    }
+
+    this.isUploadingVideo[type] = true;
+    
+    try {
+      const filePath = `public/repair-videos/${this.ticket.id}_${type}_${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('ticket-attachments')
+        .upload(filePath, file, { upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from('ticket-attachments').getPublicUrl(filePath);
+      const videoUrl = urlData.publicUrl;
+
+      const columnToUpdate = type === 'before' ? 'before_repair_video_url' : 'repair_video_url';
+      const { data: updatedTicket, error: updateError } = await supabase
+        .from('tickets')
+        .update({ [columnToUpdate]: videoUrl })
+        .eq('id', this.ticket.id)
+        .select('*, engineers(name)')
+        .single();
+      
+      if (updateError) throw updateError;
+      this.ticketUpdated.emit(updatedTicket as TicketDetail);
+      
+      alert(`تم رفع الفيديو بنجاح!`);
+      this.selectedVideos[type] = undefined;
+      const inputId = type === 'before' ? 'before_repair_video' : 'after_repair_video';
+      const fileInput = document.getElementById(inputId) as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+
+    } catch (err: any) {
+      console.error(`Error during ${type} video upload:`, err);
+      alert(`حدث خطأ أثناء رفع الفيديو: ${err.message}`);
+    } finally {
+      this.isUploadingVideo[type] = false;
+    }
+  }
+
+  async deleteVideo(type: VideoType) {
+    const column = type === 'before' ? 'before_repair_video_url' : 'repair_video_url';
+    const videoUrl = this.ticket[column as keyof TicketDetail] as string;
+
+    if (!videoUrl) {
+      alert('لا يوجد فيديو لحذفه.');
+      return;
+    }
+
+    if (!confirm('هل أنت متأكد من أنك تريد حذف هذا الفيديو؟ لا يمكن التراجع عن هذا الإجراء.')) {
+      return;
+    }
+
+    this.isDeletingVideo[type] = true;
+
+    try {
+      const bucketName = 'ticket-attachments';
+      const urlParts = videoUrl.split(`${bucketName}/`);
+      if (urlParts.length < 2) throw new Error('URL الفيديو غير صالح.');
+      const filePath = decodeURIComponent(urlParts[1]);
+
+      const { error: storageError } = await supabase.storage.from(bucketName).remove([filePath]);
+      if (storageError && storageError.message !== 'The resource was not found') {
+        throw storageError;
+      }
+
+      const { data: updatedTicket, error: updateError } = await supabase
+        .from('tickets')
+        .update({ [column]: null })
+        .eq('id', this.ticket.id)
+        .select('*, engineers(name)')
+        .single();
+
+      if (updateError) throw updateError;
+
+      this.ticketUpdated.emit(updatedTicket as TicketDetail);
+      alert('تم حذف الفيديو بنجاح.');
+
+    } catch (err: any)      {
+      console.error(`Error deleting ${type} video:`, err);
+      alert(`حدث خطأ أثناء حذف الفيديو: ${err.message}`);
+    } finally {
+      this.isDeletingVideo[type] = false;
+    }
+  }
+
+  async updateTicketStatus() {
+    if (this.isUpdatingStatus()) return;
+    
+    const newStatus = this.statusUpdateForm.value.newStatus;
+    this.isUpdatingStatus.set(true);
+
+    try {
+      const { data, error } = await supabase
+        .from('tickets')
+        .update({ status: newStatus })
+        .eq('id', this.ticket.id)
+        .select('*, engineers(name)')
+        .single();
+
+      if (error) throw error;
+
+      this.ticketUpdated.emit(data as TicketDetail);
+      alert('تم تحديث حالة العطل بنجاح!');
+
+    } catch (err: any) {
+      alert(`حدث خطأ أثناء تحديث الحالة: ${err.message}`);
+    } finally {
+      this.isUpdatingStatus.set(false);
+    }
+  }
+
+  async assignEngineer() {
+    if (this.engineerAssignmentForm.invalid || this.isAssigningEngineer()) return;
+    this.isAssigningEngineer.set(true);
+    const engineerId = this.engineerAssignmentForm.value.engineerId;
+    try {
+      const { data, error } = await supabase.from('tickets').update({ assigned_engineer_id: engineerId }).eq('id', this.ticket.id).select('*, engineers(name)').single();
+      if (error) throw error;
+      this.ticketUpdated.emit(data as TicketDetail);
+      alert('تم تعيين المهندس بنجاح!');
+    } catch (err: any) {
+      alert(`حدث خطأ أثناء تعيين المهندس: ${err.message}`);
+    } finally {
+      this.isAssigningEngineer.set(false);
+    }
+  }
+}
