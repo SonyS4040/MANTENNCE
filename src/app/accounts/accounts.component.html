@@ -1,0 +1,39 @@
+<div class="accounts-container">
+  <h2>تقارير حسابات المهندسين الشهرية</h2>
+  <p>يعرض هذا التقرير إجمالي قيمة الصيانات المكتملة لكل مهندس لحساب العمولات.</p>
+
+  @if (isLoading) {
+    <p>جاري تحميل التقارير...</p>
+  } @else if (error) {
+    <div class="error-message">{{ error }}</div>
+  } @else if (reports().length === 0) {
+    <p class="no-data">لا توجد بيانات لعرضها. لم يتم تسجيل أي تكاليف صيانة مكتملة حتى الآن.</p>
+  } @else {
+    <div class="table-responsive">
+      <table class="accounts-table">
+        <thead>
+          <tr>
+            <th>اسم المهندس</th>
+            <th>الشهر</th>
+            <th>عدد الصيانات</th>
+            <th>إجمالي قيمة الصيانات</th>
+            <th>نسبة العمولة</th>
+            <th>قيمة العمولة المستحقة</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (report of reports(); track $index) {
+            <tr>
+              <td>{{ report.engineerName }}</td>
+              <td>{{ report.month }}</td>
+              <td>{{ report.ticketCount }}</td>
+              <td>{{ report.totalCost | currency:'EGP ':'symbol':'1.2-2' }}</td>
+              <td>{{ report.commissionRate | percent:'1.0-0' }}</td>
+              <td>{{ report.commissionAmount | currency:'EGP ':'symbol':'1.2-2' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

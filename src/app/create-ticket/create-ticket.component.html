@@ -1,0 +1,69 @@
+<div class="form-container">
+  <h2>الإبلاغ عن عطل جديد</h2>
+  <p>يرجى ملء النموذج التالي لإنشاء طلب صيانة جديد.</p>
+  <form [formGroup]="ticketForm" (ngSubmit)="onSubmit()" novalidate>
+    
+    <fieldset>
+      <legend>معلومات العميل</legend>
+      <div class="form-group">
+        <label for="customerName">اسم العميل</label>
+        <input type="text" id="customerName" formControlName="customerName">
+        @if (ticketForm.get('customerName')?.invalid && ticketForm.get('customerName')?.touched) {
+          <div class="error">حقل اسم العميل مطلوب.</div>
+        }
+      </div>
+      <div class="form-group">
+        <label for="customerPhone">رقم الهاتف</label>
+        <input type="tel" id="customerPhone" formControlName="customerPhone">
+        @if (ticketForm.get('customerPhone')?.invalid && ticketForm.get('customerPhone')?.touched) {
+          <div class="error">حقل رقم الهاتف مطلوب.</div>
+        }
+      </div>
+      <div class="form-group">
+        <label for="customerAddress">عنوان المنشأة</label>
+        <textarea id="customerAddress" formControlName="customerAddress" rows="3"></textarea>
+        @if (ticketForm.get('customerAddress')?.invalid && ticketForm.get('customerAddress')?.touched) {
+          <div class="error">حقل العنوان مطلوب.</div>
+        }
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>معلومات الجهاز والعطل</legend>
+      <div class="form-group">
+        <label for="deviceType">نوع الجهاز</label>
+        <input type="text" id="deviceType" formControlName="deviceType" placeholder="مثال: جهاز ليزر لإزالة الشعر">
+        @if (ticketForm.get('deviceType')?.invalid && ticketForm.get('deviceType')?.touched) {
+          <div class="error">الرجاء إدخال نوع الجهاز.</div>
+        }
+      </div>
+      <div class="form-group">
+        <label for="serialNumber">الرقم التسلسلي (اختياري)</label>
+        <input type="text" id="serialNumber" formControlName="serialNumber">
+      </div>
+      <div class="form-group">
+        <label for="faultDescription">وصف تفصيلي للعطل</label>
+        <textarea id="faultDescription" formControlName="faultDescription" rows="5"></textarea>
+        @if (ticketForm.get('faultDescription')?.invalid && ticketForm.get('faultDescription')?.touched) {
+          <div class="error">حقل وصف العطل مطلوب.</div>
+        }
+      </div>
+      <div class="form-group">
+        <label for="priority">أولوية العطل</label>
+        <select id="priority" formControlName="priority">
+          <option value="عادي">عادي</option>
+          <option value="متوسط">متوسط</option>
+          <option value="عاجل">عاجل</option>
+        </select>
+      </div>
+    </fieldset>
+
+    <button type="submit" class="submit-btn" [disabled]="ticketForm.invalid || isSubmitting">
+      @if (isSubmitting) {
+        <span>جاري الإرسال...</span>
+      } @else {
+        <span>إرسال الطلب</span>
+      }
+    </button>
+  </form>
+</div>

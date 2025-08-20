@@ -29,7 +29,7 @@
   </div>
 </div>
 
-<!-- Video Upload Section -->
+<!-- New Video Upload Section -->
 <div class="detail-section update-section video-upload-section">
   <h3>رفع فيديوهات الصيانة</h3>
   <p class="instructions">لرفع فيديو من واتساب، قم أولاً بحفظه على جهازك ثم اختره من هنا.</p>
@@ -37,16 +37,8 @@
     <!-- Before Repair Video -->
     <div class="video-action-item">
       <h4>فيديو قبل الإصلاح</h4>
-      @if (ticket.before_repair_video_url) {
-        <div class="video-status">
-          <p>تم رفع فيديو. <a [href]="ticket.before_repair_video_url" target="_blank">مشاهدة</a></p>
-          <button (click)="deleteVideo('before')" [disabled]="isDeletingVideo['before']" class="delete-btn">
-            @if(isDeletingVideo['before']) { <span>جاري الحذف...</span> } @else { <span>حذف</span> }
-          </button>
-        </div>
-      }
       <div class="form-group">
-        <label for="before_repair_video">{{ ticket.before_repair_video_url ? 'تغيير الفيديو' : 'اختر ملف الفيديو' }}</label>
+        <label for="before_repair_video">اختر ملف الفيديو</label>
         <input type="file" id="before_repair_video" (change)="onVideoChange($event, 'before')" accept="video/*">
       </div>
       <button (click)="uploadVideo('before')" [disabled]="!selectedVideos['before'] || isUploadingVideo['before']">
@@ -57,16 +49,8 @@
     <!-- After Repair Video -->
     <div class="video-action-item">
       <h4>فيديو بعد الإصلاح</h4>
-      @if (ticket.repair_video_url) {
-        <div class="video-status">
-          <p>تم رفع فيديو. <a [href]="ticket.repair_video_url" target="_blank">مشاهدة</a></p>
-          <button (click)="deleteVideo('after')" [disabled]="isDeletingVideo['after']" class="delete-btn">
-            @if(isDeletingVideo['after']) { <span>جاري الحذف...</span> } @else { <span>حذف</span> }
-          </button>
-        </div>
-      }
       <div class="form-group">
-        <label for="after_repair_video">{{ ticket.repair_video_url ? 'تغيير الفيديو' : 'اختر ملف الفيديو' }}</label>
+        <label for="after_repair_video">اختر ملف الفيديو</label>
         <input type="file" id="after_repair_video" (change)="onVideoChange($event, 'after')" accept="video/*">
       </div>
       <button (click)="uploadVideo('after')" [disabled]="!selectedVideos['after'] || isUploadingVideo['after']">

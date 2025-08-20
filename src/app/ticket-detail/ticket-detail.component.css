@@ -1,0 +1,97 @@
+.ticket-detail-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.page-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.back-link {
+  display: inline-block;
+  color: #0a9396;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.back-link:hover {
+  color: #005f73;
+}
+
+.print-btn {
+  padding: 0.7rem 1.5rem;
+  background-color: #005f73;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.print-btn:hover {
+  background-color: #004c5a;
+}
+
+.loading-message, .error-message {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+}
+
+.error-message {
+  color: #d9534f;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 5px;
+}
+
+.ticket-header {
+  border-bottom: 2px solid #eee;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.ticket-header h1 {
+  color: #005f73;
+  font-size: 2rem;
+  margin: 0;
+}
+
+.header-meta {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.priority, .status {
+  padding: 0.4rem 1rem;
+  border-radius: 16px;
+  font-weight: bold;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.priority-عاجل { background-color: #d9534f; }
+.priority-متوسط { background-color: #f0ad4e; }
+.priority-عادي { background-color: #5cb85c; }
+
+.status-مفتوح { background-color: #f0ad4e; } /* Orange */
+.status-قيد\ المعالجة { background-color: #337ab7; } /* Blue */
+.status-تم\ الإصلاح { background-color: #5cb85c; } /* Green */
+.status-لم\ يتم\ الإصلاح { background-color: #d9534f; } /* Red */
+.status-معلق { background-color: #777777; } /* Gray */

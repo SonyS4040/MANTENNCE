@@ -80,9 +80,9 @@
   color: #666;
 }
 
-/* Video Upload Section Styles */
+/* New Video Upload Section Styles */
 .video-upload-section {
-  grid-column: 1 / -1;
+  grid-column: 1 / -1; /* Make it full width */
 }
 
 .video-upload-section .instructions {
@@ -132,59 +132,6 @@
 }
 
 .video-action-item button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.video-status {
-  background-color: #e9f5e9;
-  border: 1px solid #c8e6c9;
-  border-radius: 4px;
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-}
-
-.video-status p {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #255d28;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.video-status a {
-  font-weight: bold;
-  color: #1a431c;
-  text-decoration: none;
-}
-
-.video-status a:hover {
-  text-decoration: underline;
-}
-
-.delete-btn {
-  padding: 0.5rem 1rem;
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 0.9rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  flex-shrink: 0;
-}
-
-.delete-btn:hover {
-  background-color: #c82333;
-}
-
-.delete-btn:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }

@@ -2,7 +2,7 @@ import { Component, Input, OnInit, Output, EventEmitter, signal, inject } from '
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { supabase } from '../../integrations/supabase/client';
-import { TicketDetail } from '../models/ticket.model';
+import { TicketDetail } from '../ticket-detail/ticket-detail.component';
 
 export interface Engineer {
   id: string;
@@ -28,7 +28,6 @@ export class TicketActionsComponent implements OnInit {
   
   selectedVideos: { [key in VideoType]?: File } = {};
   isUploadingVideo: { [key in VideoType]?: boolean } = { before: false, after: false };
-  isDeletingVideo: { [key in VideoType]?: boolean } = { before: false, after: false };
 
   statusUpdateForm: FormGroup;
   engineerAssignmentForm: FormGroup;
@@ -79,15 +78,17 @@ export class TicketActionsComponent implements OnInit {
     this.isUploadingVideo[type] = true;
     
     try {
-      const filePath = `public/repair-videos/${this.ticket.id}_${type}_${Date.now()}_${file.name}`;
+      // 1. Upload video to Supabase Storage
+      const filePath = `public/repair-videos/${this.ticket.id}_${type}_${file.name}`;
       const { error: uploadError } = await supabase.storage
         .from('ticket-attachments')
-        .upload(filePath, file, { upsert: true });
+        .upload(filePath, file, { upsert: true }); // Use upsert to overwrite if needed
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage.from('ticket-attachments').getPublicUrl(filePath);
       const videoUrl = urlData.publicUrl;
 
+      // 2. Update ticket record with the new video URL
       const columnToUpdate = type === 'before' ? 'before_repair_video_url' : 'repair_video_url';
       const { data: updatedTicket, error: updateError } = await supabase
         .from('tickets')
@@ -110,52 +111,6 @@ export class TicketActionsComponent implements OnInit {
       alert(`حدث خطأ أثناء رفع الفيديو: ${err.message}`);
     } finally {
       this.isUploadingVideo[type] = false;
-    }
-  }
-
-  async deleteVideo(type: VideoType) {
-    const column = type === 'before' ? 'before_repair_video_url' : 'repair_video_url';
-    const videoUrl = this.ticket[column as keyof TicketDetail] as string;
-
-    if (!videoUrl) {
-      alert('لا يوجد فيديو لحذفه.');
-      return;
-    }
-
-    if (!confirm('هل أنت متأكد من أنك تريد حذف هذا الفيديو؟ لا يمكن التراجع عن هذا الإجراء.')) {
-      return;
-    }
-
-    this.isDeletingVideo[type] = true;
-
-    try {
-      const bucketName = 'ticket-attachments';
-      const urlParts = videoUrl.split(`${bucketName}/`);
-      if (urlParts.length < 2) throw new Error('URL الفيديو غير صالح.');
-      const filePath = decodeURIComponent(urlParts[1]);
-
-      const { error: storageError } = await supabase.storage.from(bucketName).remove([filePath]);
-      if (storageError && storageError.message !== 'The resource was not found') {
-        throw storageError;
-      }
-
-      const { data: updatedTicket, error: updateError } = await supabase
-        .from('tickets')
-        .update({ [column]: null })
-        .eq('id', this.ticket.id)
-        .select('*, engineers(name)')
-        .single();
-
-      if (updateError) throw updateError;
-
-      this.ticketUpdated.emit(updatedTicket as TicketDetail);
-      alert('تم حذف الفيديو بنجاح.');
-
-    } catch (err: any)      {
-      console.error(`Error deleting ${type} video:`, err);
-      alert(`حدث خطأ أثناء حذف الفيديو: ${err.message}`);
-    } finally {
-      this.isDeletingVideo[type] = false;
     }
   }
 
