@@ -22,7 +22,9 @@ export class CreateTicketComponent {
       deviceType: ['', Validators.required],
       serialNumber: [''],
       faultDescription: ['', Validators.required],
-      priority: ['عادي', Validators.required]
+      priority: ['عادي', Validators.required],
+      warrantyStatus: ['خارج الضمان', Validators.required],
+      visitDate: [null]
     });
   }
 
@@ -44,7 +46,9 @@ export class CreateTicketComponent {
         device_type: formValue.deviceType,
         serial_number: formValue.serialNumber,
         fault_description: formValue.faultDescription,
-        priority: formValue.priority
+        priority: formValue.priority,
+        warranty_status: formValue.warrantyStatus,
+        visit_date: formValue.visitDate
       };
 
       // Insert data into the 'tickets' table
@@ -55,7 +59,7 @@ export class CreateTicketComponent {
       }
 
       alert('تم إرسال طلب الصيانة بنجاح!');
-      this.ticketForm.reset({ priority: 'عادي' });
+      this.ticketForm.reset({ priority: 'عادي', warrantyStatus: 'خارج الضمان' });
 
     } catch (error: any) {
       console.error('Error submitting ticket:', error);

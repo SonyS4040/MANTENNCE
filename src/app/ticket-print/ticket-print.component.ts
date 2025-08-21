@@ -28,6 +28,8 @@ export interface TicketForPrint {
   repair_notes: string | null;
   handover_notes: string | null;
   maintenance_costs: MaintenanceCost[];
+  warranty_status: string;
+  visit_date: string | null;
 }
 
 @Component({

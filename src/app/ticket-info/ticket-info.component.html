@@ -17,6 +17,8 @@
     <div class="info-grid">
       <div class="info-item"><strong>نوع الجهاز:</strong><p>{{ ticket.device_type }}</p></div>
       <div class="info-item"><strong>الرقم التسلسلي:</strong><p>{{ ticket.serial_number || 'غير متوفر' }}</p></div>
+      <div class="info-item"><strong>حالة الضمان:</strong><p>{{ ticket.warranty_status }}</p></div>
+      <div class="info-item"><strong>تاريخ الزيارة المجدول:</strong><p>{{ ticket.visit_date | date:'yyyy/MM/dd' }}</p></div>
       <div class="info-item full-width"><strong>وصف العطل:</strong><p class="description">{{ ticket.fault_description }}</p></div>
       <div class="info-item"><strong>تاريخ الإنشاء:</strong><p>{{ ticket.created_at | date:'yyyy/MM/dd hh:mm a' }}</p></div>
     </div>
@@ -51,6 +53,17 @@
         <div class="form-group">
           <label for="serial_number">الرقم التسلسلي</label>
           <input id="serial_number" type="text" formControlName="serial_number">
+        </div>
+        <div class="form-group">
+          <label for="warranty_status">حالة الضمان</label>
+          <select id="warranty_status" formControlName="warranty_status">
+            <option value="خارج الضمان">خارج الضمان</option>
+            <option value="داخل الضمان">داخل الضمان</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="visit_date">تاريخ الزيارة</label>
+          <input id="visit_date" type="date" formControlName="visit_date">
         </div>
         <div class="form-group full-width">
           <label for="fault_description">وصف العطل</label>

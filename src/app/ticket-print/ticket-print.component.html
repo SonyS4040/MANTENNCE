@@ -27,6 +27,10 @@
           <p><strong>حالة العطل:</strong> {{ ticket()!.status }}</p>
           <p><strong>الأولوية:</strong> {{ ticket()!.priority }}</p>
         </div>
+         <div class="info-box">
+          <p><strong>تاريخ الزيارة:</strong> {{ ticket()!.visit_date | date:'yyyy/MM/dd' }}</p>
+          <p><strong>حالة الضمان:</strong> {{ ticket()!.warranty_status }}</p>
+        </div>
       </section>
 
       <section class="details-section">

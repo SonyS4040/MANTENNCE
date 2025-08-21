@@ -20,7 +20,9 @@ export interface TicketDetail extends Ticket {
   repair_notes: string | null;
   handover_notes: string | null;
   repair_video_url: string | null;
-  before_repair_video_url: string | null; // New field
+  before_repair_video_url: string | null;
+  warranty_status: string;
+  visit_date: string | null;
 }
 
 @Component({

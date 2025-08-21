@@ -29,6 +29,8 @@ export class TicketInfoComponent implements OnChanges {
       device_type: ['', Validators.required],
       serial_number: [''],
       fault_description: ['', Validators.required],
+      warranty_status: ['', Validators.required],
+      visit_date: [null]
     });
   }
 
@@ -53,6 +55,8 @@ export class TicketInfoComponent implements OnChanges {
       device_type: this.ticket.device_type,
       serial_number: this.ticket.serial_number,
       fault_description: this.ticket.fault_description,
+      warranty_status: this.ticket.warranty_status,
+      visit_date: this.ticket.visit_date
     });
   }
 
