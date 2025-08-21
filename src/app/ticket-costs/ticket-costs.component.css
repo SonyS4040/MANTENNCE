@@ -73,11 +73,17 @@
   font-size: 0.9rem;
 }
 
-.add-cost-form input {
+.add-cost-form input,
+.add-cost-form select {
   padding: 0.7rem;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-family: 'Cairo', sans-serif;
+  font-size: 1rem;
+}
+
+.other-description-input {
+  margin-top: 0.5rem;
 }
 
 .add-btn {

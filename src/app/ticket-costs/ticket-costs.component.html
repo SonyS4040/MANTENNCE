@@ -39,8 +39,15 @@
     <h4>إضافة بند تكلفة جديد</h4>
     <div class="form-row">
       <div class="form-group">
-        <label for="description">الوصف</label>
-        <input type="text" id="description" formControlName="description" placeholder="مثال: قطعة غيار X">
+        <label for="descriptionType">الوصف</label>
+        <select id="descriptionType" formControlName="descriptionType">
+          <option value="الزياره">الزياره</option>
+          <option value="اتعاب الصيانه">اتعاب الصيانه</option>
+          <option value="اخري">اخري</option>
+        </select>
+        @if (costItemForm.get('descriptionType')?.value === 'اخري') {
+          <input type="text" class="other-description-input" id="description" formControlName="description" placeholder="يرجى تحديد الوصف...">
+        }
       </div>
       <div class="form-group">
         <label for="quantity">الكمية</label>
