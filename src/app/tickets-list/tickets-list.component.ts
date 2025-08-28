@@ -1,7 +1,8 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { supabase } from '../../integrations/supabase/client';
 import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 export interface Ticket {
   id: string;
@@ -16,16 +17,39 @@ export interface Ticket {
 @Component({
   selector: 'app-tickets-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './tickets-list.component.html',
   styleUrl: './tickets-list.component.css'
 })
 export class TicketsListComponent implements OnInit {
-  tickets: Ticket[] = [];
+  tickets = signal<Ticket[]>([]);
   isLoading = true;
   error: string | null = null;
 
+  // Signals for filtering
+  searchTerm = signal('');
+  searchDate = signal('');
+
   private router = inject(Router);
+
+  // Computed signal for filtered tickets
+  filteredTickets = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    const date = this.searchDate();
+
+    return this.tickets().filter(ticket => {
+      const matchesTerm = term
+        ? ticket.customer_name.toLowerCase().includes(term) ||
+          ticket.ticket_ref.toLowerCase().includes(term)
+        : true;
+
+      const matchesDate = date
+        ? new Date(ticket.created_at).toISOString().split('T')[0] === date
+        : true;
+
+      return matchesTerm && matchesDate;
+    });
+  });
 
   async ngOnInit() {
     await this.fetchTickets();
@@ -49,7 +73,7 @@ export class TicketsListComponent implements OnInit {
       }
       
       if (data) {
-        this.tickets = data;
+        this.tickets.set(data);
       }
 
     } catch (err: any) {
@@ -62,6 +86,11 @@ export class TicketsListComponent implements OnInit {
 
   navigateToDetail(ticketId: string) {
     this.router.navigate(['/tickets', ticketId]);
+  }
+
+  clearFilters() {
+    this.searchTerm.set('');
+    this.searchDate.set('');
   }
 
   async deleteTicket(ticketId: string, ticketRef: string, event: MouseEvent) {
@@ -82,7 +111,7 @@ export class TicketsListComponent implements OnInit {
       }
 
       // Update the UI instantly by removing the ticket from the local list
-      this.tickets = this.tickets.filter(ticket => ticket.id !== ticketId);
+      this.tickets.update(tickets => tickets.filter(ticket => ticket.id !== ticketId));
       alert(`تم حذف العطل "${ticketRef}" بنجاح.`);
 
     } catch (err: any) {

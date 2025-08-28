@@ -13,6 +13,43 @@ h2 {
   margin-bottom: 2rem;
 }
 
+.filters-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  flex-grow: 1;
+  min-width: 200px;
+}
+
+.search-input, .date-input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: 'Cairo', sans-serif;
+}
+
+.clear-btn {
+  padding: 0.8rem 1.5rem;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.clear-btn:hover {
+  background-color: #5a6268;
+}
+
 .table-responsive {
   overflow-x: auto;
 }
@@ -62,7 +99,7 @@ h2 {
 .status-لم\ يتم\ الإصلاح { background-color: #d9534f; } /* Red */
 .status-معلق { background-color: #777777; } /* Gray */
 
-.error-message {
+.error-message, .no-results {
   text-align: center;
   padding: 2rem;
   background-color: #fff3cd;
