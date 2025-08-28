@@ -41,55 +41,8 @@ p {
   font-weight: bold;
 }
 
-.expandable-row {
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.expandable-row:hover {
+.accounts-table tbody tr:hover {
   background-color: #f1f1f1;
-}
-
-.expandable-row.expanded {
-  background-color: #eef7f7;
-  border-bottom: 2px solid #0a9396;
-}
-
-.details-row td {
-  padding: 0;
-  border-bottom: 1px solid #ddd;
-}
-
-.details-container {
-  padding: 1.5rem;
-  background-color: #fdfdfd;
-}
-
-.details-container h4 {
-  color: #005f73;
-  margin-bottom: 1rem;
-}
-
-.details-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: right;
-  font-size: 0.9rem;
-}
-
-.details-table th, .details-table td {
-  padding: 0.75rem;
-  border: 1px solid #e0e0e0;
-}
-
-.details-table thead th {
-  background-color: #f0f0f0;
-}
-
-.details-link {
-  color: #0a9396;
-  font-weight: bold;
-  text-decoration: underline;
 }
 
 .error-message, .no-data {

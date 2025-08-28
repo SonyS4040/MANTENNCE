@@ -1,15 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule, CurrencyPipe, PercentPipe, DatePipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { supabase } from '../../integrations/supabase/client';
+import { CommonModule, CurrencyPipe, PercentPipe } from '@angular/common';
 
-interface ReportTicket {
-  id: string;
-  ticket_ref: string;
-  customer_name: string;
-  created_at: string;
-  commissionable_cost: number;
-}
+import { supabase } from '../../integrations/supabase/client';
 
 interface EngineerMonthlyTotal {
   engineerName: string;
@@ -18,33 +10,22 @@ interface EngineerMonthlyTotal {
   ticketCount: number;
   commissionRate: number;
   commissionAmount: number;
-  tickets: ReportTicket[];
-  uniqueKey: string;
 }
 
 @Component({
   selector: 'app-accounts',
   standalone: true,
-  imports: [CommonModule, CurrencyPipe, PercentPipe, DatePipe, RouterLink],
+  imports: [CommonModule, CurrencyPipe, PercentPipe],
   templateUrl: './accounts.component.html',
   styleUrl: './accounts.component.css'
 })
 export class AccountsComponent implements OnInit {
   reports = signal<EngineerMonthlyTotal[]>([]);
-  expandedReportKey = signal<string | null>(null);
   isLoading = true;
   error: string | null = null;
 
   ngOnInit(): void {
     this.loadReports();
-  }
-
-  toggleDetails(key: string) {
-    if (this.expandedReportKey() === key) {
-      this.expandedReportKey.set(null); // Collapse if already open
-    } else {
-      this.expandedReportKey.set(key); // Expand new one
-    }
   }
 
   async loadReports() {
@@ -53,39 +34,33 @@ export class AccountsComponent implements OnInit {
     try {
       const { data, error } = await supabase
         .from('tickets')
-        .select('id, ticket_ref, customer_name, created_at, engineers(name, commission_rate), maintenance_costs(*)')
+        .select('id, created_at, engineers(name, commission_rate), maintenance_costs(*)')
         .eq('status', 'تم الإصلاح')
         .not('assigned_engineer_id', 'is', null);
 
       if (error) throw error;
 
-      const monthlyTotals = new Map<string, { totalCost: number; tickets: ReportTicket[]; commissionRate: number }>();
+      const monthlyTotals = new Map<string, { totalCost: number; ticketCount: Set<string>; commissionRate: number }>();
 
       for (const ticket of data) {
         const engineer = ticket.engineers as any;
         if (engineer && ticket.maintenance_costs.length > 0) {
+          // Filter for commissionable costs only ("الزياره" and "اتعاب الصيانه")
           const commissionableCosts = ticket.maintenance_costs.filter((item: any) => 
             item.description === 'الزياره' || item.description === 'اتعاب الصيانه'
           );
 
-          const ticketTotalCommissionableCost = commissionableCosts.reduce((sum: number, item: any) => sum + (item.quantity * item.unit_price), 0);
+          // Calculate total based on filtered costs
+          const ticketTotalCost = commissionableCosts.reduce((sum: number, item: any) => sum + (item.quantity * item.unit_price), 0);
           
-          if (ticketTotalCommissionableCost > 0) {
+          if (ticketTotalCost > 0) {
             const date = new Date(ticket.created_at);
             const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
             const engineerMonthKey = `${engineer.name}::${monthKey}`;
 
-            const current = monthlyTotals.get(engineerMonthKey) || { totalCost: 0, tickets: [], commissionRate: engineer.commission_rate };
-            
-            current.totalCost += ticketTotalCommissionableCost;
-            current.tickets.push({
-              id: ticket.id,
-              ticket_ref: ticket.ticket_ref,
-              customer_name: ticket.customer_name,
-              created_at: ticket.created_at,
-              commissionable_cost: ticketTotalCommissionableCost
-            });
-
+            const current = monthlyTotals.get(engineerMonthKey) || { totalCost: 0, ticketCount: new Set(), commissionRate: engineer.commission_rate };
+            current.totalCost += ticketTotalCost;
+            current.ticketCount.add(ticket.id);
             monthlyTotals.set(engineerMonthKey, current);
           }
         }
@@ -101,11 +76,9 @@ export class AccountsComponent implements OnInit {
           engineerName,
           month: monthFormatted,
           totalCost: value.totalCost,
-          ticketCount: value.tickets.length,
+          ticketCount: value.ticketCount.size,
           commissionRate: value.commissionRate,
-          commissionAmount: value.totalCost * value.commissionRate,
-          tickets: value.tickets,
-          uniqueKey: key
+          commissionAmount: value.totalCost * value.commissionRate
         });
       }
       
