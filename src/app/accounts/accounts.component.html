@@ -1,6 +1,6 @@
 <div class="accounts-container">
   <h2>تقارير حسابات المهندسين الشهرية</h2>
-  <p>يعرض هذا التقرير إجمالي قيمة الصيانات المكتملة لكل مهندس لحساب العمولات. اضغط على أي صف لعرض التفاصيل.</p>
+  <p>يعرض هذا التقرير إجمالي قيمة الصيانات المكتملة لكل مهندس لحساب العمولات.</p>
 
   @if (isLoading) {
     <p>جاري تحميل التقارير...</p>
@@ -22,8 +22,8 @@
           </tr>
         </thead>
         <tbody>
-          @for (report of reports(); track report.key) {
-            <tr (click)="toggleDetails(report.key)" class="report-row">
+          @for (report of reports(); track $index) {
+            <tr>
               <td>{{ report.engineerName }}</td>
               <td>{{ report.month }}</td>
               <td>{{ report.ticketCount }}</td>
@@ -31,33 +31,6 @@
               <td>{{ report.commissionRate | percent:'1.0-0' }}</td>
               <td>{{ report.commissionAmount | currency:'EGP ':'symbol':'1.2-2' }}</td>
             </tr>
-            @if (expandedReportKey() === report.key) {
-              <tr class="details-row">
-                <td colspan="6">
-                  <div class="details-container">
-                    <h4>تفاصيل صيانات {{ report.engineerName }} لشهر {{ report.month }}</h4>
-                    <table class="details-table">
-                      <thead>
-                        <tr>
-                          <th>الرقم المرجعي</th>
-                          <th>اسم العميل</th>
-                          <th>قيمة الصيانة</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @for (ticket of report.tickets; track ticket.id) {
-                          <tr>
-                            <td><a [routerLink]="['/tickets', ticket.id]">{{ ticket.ticket_ref }}</a></td>
-                            <td>{{ ticket.customer_name }}</td>
-                            <td>{{ ticket.cost | currency:'EGP ':'symbol':'1.2-2' }}</td>
-                          </tr>
-                        }
-                      </tbody>
-                    </table>
-                  </div>
-                </td>
-              </tr>
-            }
           }
         </tbody>
       </table>

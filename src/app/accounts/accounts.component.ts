@@ -1,17 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule, CurrencyPipe, PercentPipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+
 import { supabase } from '../../integrations/supabase/client';
 
-// واجهة لتفاصيل الصيانة داخل التقرير
-interface TicketDetailForReport {
-  id: string;
-  ticket_ref: string;
-  customer_name: string;
-  cost: number;
-}
-
-// تحديث الواجهة الرئيسية لتشمل تفاصيل الصيانات
 interface EngineerMonthlyTotal {
   engineerName: string;
   month: string;
@@ -19,14 +10,12 @@ interface EngineerMonthlyTotal {
   ticketCount: number;
   commissionRate: number;
   commissionAmount: number;
-  tickets: TicketDetailForReport[];
-  key: string; // مفتاح فريد لتتبع الصف المفتوح
 }
 
 @Component({
   selector: 'app-accounts',
   standalone: true,
-  imports: [CommonModule, CurrencyPipe, PercentPipe, RouterLink],
+  imports: [CommonModule, CurrencyPipe, PercentPipe],
   templateUrl: './accounts.component.html',
   styleUrl: './accounts.component.css'
 })
@@ -34,19 +23,9 @@ export class AccountsComponent implements OnInit {
   reports = signal<EngineerMonthlyTotal[]>([]);
   isLoading = true;
   error: string | null = null;
-  expandedReportKey = signal<string | null>(null); // لتتبع الصف المفتوح حالياً
 
   ngOnInit(): void {
     this.loadReports();
-  }
-
-  // دالة لفتح وإغلاق تفاصيل الصف
-  toggleDetails(key: string): void {
-    if (this.expandedReportKey() === key) {
-      this.expandedReportKey.set(null); // إغلاق الصف إذا كان مفتوحاً
-    } else {
-      this.expandedReportKey.set(key); // فتح صف جديد
-    }
   }
 
   async loadReports() {
@@ -55,20 +34,23 @@ export class AccountsComponent implements OnInit {
     try {
       const { data, error } = await supabase
         .from('tickets')
-        .select('id, created_at, ticket_ref, customer_name, engineers(name, commission_rate), maintenance_costs(*)')
+        .select('id, created_at, engineers(name, commission_rate), maintenance_costs(*)')
         .eq('status', 'تم الإصلاح')
         .not('assigned_engineer_id', 'is', null);
 
       if (error) throw error;
 
-      const monthlyTotals = new Map<string, { totalCost: number; tickets: TicketDetailForReport[]; commissionRate: number }>();
+      const monthlyTotals = new Map<string, { totalCost: number; ticketCount: Set<string>; commissionRate: number }>();
 
       for (const ticket of data) {
         const engineer = ticket.engineers as any;
         if (engineer && ticket.maintenance_costs.length > 0) {
+          // Filter for commissionable costs only ("الزياره" and "اتعاب الصيانه")
           const commissionableCosts = ticket.maintenance_costs.filter((item: any) => 
             item.description === 'الزياره' || item.description === 'اتعاب الصيانه'
           );
+
+          // Calculate total based on filtered costs
           const ticketTotalCost = commissionableCosts.reduce((sum: number, item: any) => sum + (item.quantity * item.unit_price), 0);
           
           if (ticketTotalCost > 0) {
@@ -76,16 +58,9 @@ export class AccountsComponent implements OnInit {
             const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
             const engineerMonthKey = `${engineer.name}::${monthKey}`;
 
-            const current = monthlyTotals.get(engineerMonthKey) || { totalCost: 0, tickets: [] as TicketDetailForReport[], commissionRate: engineer.commission_rate };
-            
+            const current = monthlyTotals.get(engineerMonthKey) || { totalCost: 0, ticketCount: new Set(), commissionRate: engineer.commission_rate };
             current.totalCost += ticketTotalCost;
-            current.tickets.push({
-              id: ticket.id,
-              ticket_ref: ticket.ticket_ref,
-              customer_name: ticket.customer_name,
-              cost: ticketTotalCost
-            });
-
+            current.ticketCount.add(ticket.id);
             monthlyTotals.set(engineerMonthKey, current);
           }
         }
@@ -101,11 +76,9 @@ export class AccountsComponent implements OnInit {
           engineerName,
           month: monthFormatted,
           totalCost: value.totalCost,
-          ticketCount: value.tickets.length,
+          ticketCount: value.ticketCount.size,
           commissionRate: value.commissionRate,
-          commissionAmount: value.totalCost * value.commissionRate,
-          tickets: value.tickets,
-          key: key
+          commissionAmount: value.totalCost * value.commissionRate
         });
       }
       
