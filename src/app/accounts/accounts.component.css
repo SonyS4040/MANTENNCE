@@ -53,3 +53,53 @@ p {
   color: #856404;
   border-radius: 5px;
 }
+
+.report-row {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.details-row td {
+  padding: 0;
+  border-bottom: 2px solid #0a9396;
+}
+
+.details-container {
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+}
+
+.details-container h4 {
+  color: #005f73;
+  margin-bottom: 1rem;
+}
+
+.details-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: right;
+  background-color: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+}
+
+.details-table th, .details-table td {
+  padding: 0.8rem;
+  border: 1px solid #e0e0e0;
+}
+
+.details-table thead th {
+  background-color: #eef7f7;
+  font-weight: 600;
+}
+
+.details-table a {
+  color: #0a9396;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.details-table a:hover {
+  text-decoration: underline;
+}

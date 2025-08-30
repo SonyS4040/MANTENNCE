@@ -1,6 +1,6 @@
 <div class="accounts-container">
   <h2>تقارير حسابات المهندسين الشهرية</h2>
-  <p>يعرض هذا التقرير إجمالي قيمة الصيانات المكتملة لكل مهندس لحساب العمولات.</p>
+  <p>يعرض هذا التقرير إجمالي قيمة الصيانات المكتملة لكل مهندس لحساب العمولات. اضغط على أي صف لعرض التفاصيل.</p>
 
   @if (isLoading) {
     <p>جاري تحميل التقارير...</p>
@@ -23,7 +23,7 @@
         </thead>
         <tbody>
           @for (report of reports(); track $index) {
-            <tr>
+            <tr (click)="toggleDetails(report)" class="report-row">
               <td>{{ report.engineerName }}</td>
               <td>{{ report.month }}</td>
               <td>{{ report.ticketCount }}</td>
@@ -31,6 +31,35 @@
               <td>{{ report.commissionRate | percent:'1.0-0' }}</td>
               <td>{{ report.commissionAmount | currency:'EGP ':'symbol':'1.2-2' }}</td>
             </tr>
+            @if (expandedReportKey() === (report.engineerName + '::' + report.month)) {
+              <tr class="details-row">
+                <td colspan="6">
+                  <div class="details-container">
+                    <h4>تفاصيل صيانات المهندس/ {{ report.engineerName }} لشهر {{ report.month }}</h4>
+                    <table class="details-table">
+                      <thead>
+                        <tr>
+                          <th>رقم العطل</th>
+                          <th>اسم العميل</th>
+                          <th>تاريخ الإنشاء</th>
+                          <th>قيمة الصيانة (للعمولة)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (ticket of report.tickets; track ticket.id) {
+                          <tr>
+                            <td><a [routerLink]="['/tickets', ticket.id]" target="_blank">{{ ticket.ticket_ref }}</a></td>
+                            <td>{{ ticket.customer_name }}</td>
+                            <td>{{ ticket.created_at | date:'yyyy/MM/dd' }}</td>
+                            <td>{{ ticket.commissionable_cost | currency:'EGP ' }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+            }
           }
         </tbody>
       </table>
