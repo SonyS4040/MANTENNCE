@@ -163,6 +163,32 @@
   background-color: #5a6268;
 }
 
+.video-actions {
+  margin-top: 1rem;
+}
+
+.whatsapp-btn {
+  padding: 0.7rem 1.5rem;
+  background-color: #25D366; /* WhatsApp Green */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-family: 'Cairo', sans-serif;
+  font-size: 1rem;
+}
+
+.whatsapp-btn:hover {
+  background-color: #128C7E;
+}
+
+.whatsapp-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   .form-grid {
     grid-template-columns: 1fr;

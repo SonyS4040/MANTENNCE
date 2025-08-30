@@ -95,6 +95,11 @@
       <source [src]="ticket.before_repair_video_url" type="video/mp4">
       متصفحك لا يدعم عرض الفيديو.
     </video>
+    <div class="video-actions">
+      <button (click)="sendWhatsAppVideo('before')" class="whatsapp-btn" [disabled]="isSendingBeforeVideo()">
+        @if(isSendingBeforeVideo()) { <span>جاري الإرسال...</span> } @else { <span>إرسال عبر واتساب</span> }
+      </button>
+    </div>
   </div>
 }
 
@@ -105,5 +110,10 @@
       <source [src]="ticket.repair_video_url" type="video/mp4">
       متصفحك لا يدعم عرض الفيديو.
     </video>
+    <div class="video-actions">
+      <button (click)="sendWhatsAppVideo('after')" class="whatsapp-btn" [disabled]="isSendingAfterVideo()">
+        @if(isSendingAfterVideo()) { <span>جاري الإرسال...</span> } @else { <span>إرسال عبر واتساب</span> }
+      </button>
+    </div>
   </div>
 }

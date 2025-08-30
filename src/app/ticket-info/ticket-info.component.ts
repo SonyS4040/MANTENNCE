@@ -17,6 +17,8 @@ export class TicketInfoComponent implements OnChanges {
 
   isEditing = signal(false);
   isSaving = signal(false);
+  isSendingBeforeVideo = signal(false);
+  isSendingAfterVideo = signal(false);
   ticketForm: FormGroup;
 
   private fb = inject(FormBuilder);
@@ -85,6 +87,42 @@ export class TicketInfoComponent implements OnChanges {
       alert(`حدث خطأ أثناء تحديث البيانات: ${err.message}`);
     } finally {
       this.isSaving.set(false);
+    }
+  }
+
+  async sendWhatsAppVideo(videoType: 'before' | 'after'): Promise<void> {
+    if (!confirm(`هل أنت متأكد من رغبتك في إرسال فيديو "${videoType === 'before' ? 'قبل الإصلاح' : 'بعد الإصلاح'}" إلى العميل عبر واتساب؟`)) {
+      return;
+    }
+
+    if (videoType === 'before') {
+      this.isSendingBeforeVideo.set(true);
+    } else {
+      this.isSendingAfterVideo.set(true);
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('send-whatsapp-video', {
+        body: { ticketId: this.ticket.id, videoType },
+      });
+
+      if (error) throw error;
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      alert('تم إرسال الفيديو بنجاح عبر واتساب!');
+
+    } catch (err: any) {
+      console.error('Error sending WhatsApp video:', err);
+      alert(`حدث خطأ أثناء إرسال الفيديو: ${err.message}\n\nتأكد من أن أرقام Twilio وبيانات الاعتماد تم إعدادها بشكل صحيح في Supabase.`);
+    } finally {
+      if (videoType === 'before') {
+        this.isSendingBeforeVideo.set(false);
+      } else {
+        this.isSendingAfterVideo.set(false);
+      }
     }
   }
 }
