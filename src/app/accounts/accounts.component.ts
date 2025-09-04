@@ -1,6 +1,6 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule, CurrencyPipe, PercentPipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { supabase } from '../../integrations/supabase/client';
 
 interface TicketDetailForReport {
@@ -34,6 +34,8 @@ export class AccountsComponent implements OnInit {
   error: string | null = null;
   expandedReportKey = signal<string | null>(null);
 
+  private router = inject(Router);
+
   ngOnInit(): void {
     this.loadReports();
   }
@@ -45,6 +47,21 @@ export class AccountsComponent implements OnInit {
     } else {
       this.expandedReportKey.set(key); // Expand new one
     }
+  }
+
+  openTicketInNewTab(ticketId: string, event: MouseEvent): void {
+    // منع السلوك الافتراضي للرابط
+    event.preventDefault();
+    // إيقاف انتشار الحدث إلى الصف القابل للضغط
+    event.stopPropagation();
+
+    // استخدام Angular Router لإنشاء الرابط للتبويب الجديد
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/tickets', ticketId])
+    );
+    
+    // فتح الرابط في تبويب جديد
+    window.open(url, '_blank');
   }
 
   async loadReports() {

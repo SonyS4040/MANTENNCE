@@ -48,7 +48,7 @@
                       <tbody>
                         @for (ticket of report.tickets; track ticket.id) {
                           <tr>
-                            <td><a href="/tickets/{{ticket.id}}" target="_blank">{{ ticket.ticket_ref }}</a></td>
+                            <td><a href="/tickets/{{ticket.id}}" (click)="openTicketInNewTab(ticket.id, $event)">{{ ticket.ticket_ref }}</a></td>
                             <td>{{ ticket.customer_name }}</td>
                             <td>{{ ticket.created_at | date:'yyyy/MM/dd' }}</td>
                             <td>{{ ticket.commissionable_cost | currency:'EGP ' }}</td>
